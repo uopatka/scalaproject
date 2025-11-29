@@ -3,6 +3,7 @@
   <component name="ScalaSbtSettings">
     <option name="linkedExternalProjectsSettings">
       <SbtProjectSettings>
+<<<<<<< HEAD
         <option name="converterVersion" value="2" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
@@ -13,6 +14,9 @@
         </option>
         <option name="sbtVersion" value="1.11.7" />
         <option name="separateProdAndTestSourcesIsExplicit" value="true" />
+=======
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+>>>>>>> bda53a36cd3b27ef6c2726636860fed4318ec67b
       </SbtProjectSettings>
     </option>
   </component>

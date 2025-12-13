@@ -10,7 +10,7 @@ Aleksandra Woźnica
 
 ## Ważne
 Defaultowy branch (main) nazywa się play-framework, zapewne zmienimy w przyszłości nazwę na main.
-Co oznacza, że pobierając kod z Githuba używajcie ```git pull origin play-framework``` 
+Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-framework``` 
 
 ## Użyte frameworki
 - **Play** https://www.playframework.com/

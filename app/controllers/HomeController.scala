@@ -1,10 +1,11 @@
 package controllers
 
+import models.{Book, BookEntry}
 import play.api.mvc._
 
 import javax.inject._
-
 import repositories.BookRepository
+import repositories.BookEntryRepository
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -13,7 +14,8 @@ import repositories.BookRepository
 @Singleton
 class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
-                                bookRepository: BookRepository
+                                bookRepository: BookRepository,
+                                bookEntryRepository: BookEntryRepository,
                               ) extends BaseController {
 
   /**
@@ -24,14 +26,22 @@ class HomeController @Inject()(
    * a path of `/`.
    */
   def index() = Action { implicit request =>
+    val bookEntries = bookEntryRepository.findAll()
     val books = bookRepository.findAll()
-    Ok(views.html.index(books)) // selectedBook = None by default
+    Ok(views.html.index(bookEntries, books)) // selectedBook = None by default
+    // Q(AW): should I pass selectedBook = none explicitly?
   }
 
   def showBook(isbn: String) = Action { implicit request =>
+    val bookEntries = bookEntryRepository.findAll()
     val books = bookRepository.findAll()
-    val selectedBook = books.find(_.isbn == isbn)
-    Ok(views.html.index(books, selectedBook))
+    val selectedBook: Option[(BookEntry, Book)] =
+      for {
+        entry <- bookEntries.find(_.isbn == isbn)
+        book  <- books.find(_.isbn == isbn)
+    } yield (entry, book)
+
+    Ok(views.html.index(bookEntries, books, selectedBook))
   }
 
   def addBook() = Action { implicit request: Request[AnyContent] =>

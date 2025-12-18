@@ -1,4 +1,4 @@
-@(books: List[models.Book], selectedBook: Option[models.Book] = None)
+@(bookEntries: List[models.BookEntry], books: List[models.Book], selectedBook: Option[(models.BookEntry, models.Book)] = None)
 
 @main("Strona główna") {
 <!-- kolory strony do zmiany w przyszłości -->
@@ -48,28 +48,34 @@
 
         <div class="col-md-7">
             <div class="green-background-panel"> <!-- do dodania przyciski z tytułami książek -->
-                @if(books.isEmpty) {
-                <p>Brak książek.</p>
+                @if(bookEntries.isEmpty) {
+                    <p>Brak książek.</p>
                 } else {
-                @for(book <- books) { <!-- trzeba to wycentrowac lol -->
-                <a href="@routes.HomeController.showBook(book.isbn)"
-                   class="book-button
-                   @if(selectedBook.exists(_.isbn == book.isbn)) { active }">
-
-                    <strong>@book.title</strong><br>
-                    <span class="book-author">@book.author</span>
-                </a>
-                }
+                    @for(entry <- bookEntries) { <!-- trzeba to wycentrowac lol -->
+                        @defining(books.find(_.isbn == entry.isbn)) { bookOpt =>
+                            <a href="@routes.HomeController.showBook(entry.isbn)"
+                               class="book-button
+                               @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
+                                @bookOpt.map { book =>
+                                    <strong>@book.title</strong><br>
+                                    <span class="book-author">@book.author</span>
+                                }.getOrElse {
+                                    <em>Nieznana książka (ISBN: @entry.isbn)</em>
+                                }
+                            </a>
+                        }
+                    }
                 }
             </div>
         </div>
 
         <div class="col-md-5">
             <div class="green-background-panel">
-                @selectedBook.map { book =>
+                @selectedBook.map { case (entry, book) =>
                     <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
+                    <p><strong>Status:</strong> @entry.status</p>
                 }.getOrElse {
                     <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
                 }
@@ -78,4 +84,3 @@
 
     </div> </div>
 }
-

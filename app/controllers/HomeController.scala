@@ -3,11 +3,14 @@ package controllers
 import models.{Book, BookEntry}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 
 import javax.inject._
 import repositories.BookRepository
 import repositories.BookEntryRepository
+
+import java.time.LocalDateTime
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -18,7 +21,7 @@ class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
                                 bookRepository: BookRepository,
                                 bookEntryRepository: BookEntryRepository,
-                              ) extends BaseController {
+                              ) extends BaseController with I18nSupport {
 
   /**
    * Create an Action to render an HTML page.
@@ -68,6 +71,18 @@ class HomeController @Inject()(
       formWithErrors => BadRequest(views.html.addBook(formWithErrors)),
       bookData => {
         bookRepository.add(bookData)
+
+        val userId: Long = 1 // TODO: replace with logged-in user ID
+        val newEntry = BookEntry(
+          id = bookEntryRepository.nextId(),
+          user_id = userId,
+          isbn = bookData.isbn,
+          created_at = LocalDateTime.now(),
+          status = "to read",
+          pages_read = 0
+        )
+        bookEntryRepository.add(newEntry)
+
         Redirect(routes.HomeController.index())
       }
     )

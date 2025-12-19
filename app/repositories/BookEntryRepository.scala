@@ -27,4 +27,9 @@ class BookEntryRepository {
       case e if e.id == entry.id => entry
       case e => e
     }
+
+  def nextId(): Long = {
+    if (bookEntries.isEmpty) 1
+    else bookEntries.map(_.id).max + 1
+  }
 }

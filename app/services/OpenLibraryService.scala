@@ -29,8 +29,8 @@ class OpenLibraryService @Inject() (
             isbn = isbn,
             title = olBook.title,
             author = olBook.authors.headOption.map(_.name).getOrElse(""),
-            publish_year = olBook.publish_date.flatMap(_.take(4).toIntOption).getOrElse(0),
-            pages = olBook.number_of_pages.getOrElse(0),
+            publishYear = olBook.publishDate.flatMap(_.take(4).toIntOption).getOrElse(0),
+            pages = olBook.numberOfPages.getOrElse(0),
             cover = olBook.cover.flatMap(_.medium).getOrElse("")
           )
         }

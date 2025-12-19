@@ -2,6 +2,6 @@ package models
 
 import java.time.LocalDateTime
 
-case class BookEntry (id: Long, user_id: Long, isbn: String,
-                      created_at: LocalDateTime = LocalDateTime.now(), status: BookStatus = BookStatus.ToRead,
-                      pages_read: Int = 0)
+case class BookEntry (id: Long, userId: Long, isbn: String,
+                      createdAt: LocalDateTime = LocalDateTime.now(), status: BookStatus = BookStatus.ToRead,
+                      pagesRead: Int = 0)

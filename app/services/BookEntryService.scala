@@ -14,7 +14,7 @@ class BookEntryService @Inject()(repo: BookEntryRepository) {
   }
 
   def updatePagesRead(entry: BookEntry, pages: Int): BookEntry = {
-    val updated = entry.copy(pages_read = pages)
+    val updated = entry.copy(pagesRead = pages)
     repo.update(updated)
     updated
   }

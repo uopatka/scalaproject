@@ -84,7 +84,7 @@ class HomeController @Inject()(
             val userId: Long = 1
             val newEntry = BookEntry(
               id = bookEntryRepository.nextId(),
-              user_id = userId,
+              userId = userId,
               isbn = fetchedBook.isbn
             )
             bookEntryRepository.add(newEntry)

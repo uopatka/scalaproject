@@ -8,8 +8,8 @@ case class OpenLibraryCover(medium: Option[String])
 case class OpenLibraryBook(
                             title: String,
                             authors: Seq[OpenLibraryAuthor],
-                            publish_date: Option[String],
-                            number_of_pages: Option[Int],
+                            publishDate: Option[String],
+                            numberOfPages: Option[Int],
                             cover: Option[OpenLibraryCover]
                           )
 

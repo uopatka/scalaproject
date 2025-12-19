@@ -1,4 +1,6 @@
-@()
+@(bookForm: play.api.data.Form[models.Book])
+
+@import controllers.routes
 
 @main("Dodaj książkę") {
     <div class="container mt-4"> <div class="text-center mb-5">
@@ -7,7 +9,4 @@
 
         <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary">Wróć do listy</a>
     </div> </div>
-
-
-
 }

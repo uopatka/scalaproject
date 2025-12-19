@@ -1,6 +1,8 @@
 package controllers
 
 import models.{Book, BookEntry}
+import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.mvc._
 
 import javax.inject._
@@ -44,8 +46,31 @@ class HomeController @Inject()(
     Ok(views.html.index(bookEntries, books, selectedBook))
   }
 
+  val bookForm: Form[Book] = Form(
+    mapping(
+      "isbn" -> nonEmptyText,
+      "title" -> nonEmptyText,
+      "author" -> nonEmptyText
+    )(
+      (isbn, title, author) => Book(isbn, title, author, 0, 0, "to read")
+    )(
+      book => Some((book.isbn, book.title, book.author))
+    )
+  )
+
+
   def addBook() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.addBook())
+    Ok(views.html.addBook(bookForm))
+  }
+
+  def addBookSubmit() = Action { implicit request =>
+    bookForm.bindFromRequest().fold(
+      formWithErrors => BadRequest(views.html.addBook(formWithErrors)),
+      bookData => {
+        bookRepository.add(bookData)
+        Redirect(controllers.HomeController.index())
+      }
+    )
   }
 
 }

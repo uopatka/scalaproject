@@ -1,8 +1,11 @@
 package controllers
 
 import models.{Book, BookEntry}
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.Forms.{mapping, nonEmptyText, single}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 
@@ -20,7 +23,9 @@ class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
                                 bookRepository: BookRepository,
                                 bookEntryRepository: BookEntryRepository,
-                              ) extends BaseController with I18nSupport {
+                                openLibraryService: services.OpenLibraryService
+                              )(implicit ec: ExecutionContext)
+                                extends BaseController with I18nSupport {
 
   /**
    * Create an Action to render an HTML page.
@@ -48,39 +53,51 @@ class HomeController @Inject()(
     Ok(views.html.index(bookEntries, books, selectedBook))
   }
 
-  val bookForm: Form[Book] = Form(
-    mapping(
-      "isbn" -> nonEmptyText,
-      "title" -> nonEmptyText,
-      "author" -> nonEmptyText
-    )(
-      (isbn, title, author) => Book(isbn, title, author, 0, 0, "to read")
-    )(
-      book => Some((book.isbn, book.title, book.author))
+  val bookForm: Form[String] = Form(
+    single(
+      "isbn" -> nonEmptyText.verifying(
+        "Nieprawidłowy ISBN",
+        isbn => isbn.replaceAll("-", "").matches("""\d{10}|\d{13}""")
+      )
     )
   )
+
+
 
 
   def addBook() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.addBook(bookForm))
   }
 
-  def addBookSubmit() = Action { implicit request =>
+  def addBookSubmit() = Action.async { implicit request =>
     bookForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(views.html.addBook(formWithErrors)),
-      bookData => {
-        bookRepository.add(bookData)
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.addBook(formWithErrors))
+        ),
 
-        val userId: Long = 1 // TODO: replace with logged-in user ID
-        val newEntry = BookEntry(
-          id = bookEntryRepository.nextId(),
-          user_id = userId,
-          isbn = bookData.isbn
-        )
-        bookEntryRepository.add(newEntry)
+      isbn =>
+        openLibraryService.fetchByIsbn(isbn).map {
+          case Some(fetchedBook) =>
+            bookRepository.add(fetchedBook)
 
-        Redirect(routes.HomeController.index())
-      }
+            val userId: Long = 1
+            val newEntry = BookEntry(
+              id = bookEntryRepository.nextId(),
+              user_id = userId,
+              isbn = fetchedBook.isbn
+            )
+            bookEntryRepository.add(newEntry)
+
+            Redirect(routes.HomeController.index())
+
+          case None =>
+            BadRequest(
+              views.html.addBook(
+                bookForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+              )
+            )
+        }
     )
   }
 

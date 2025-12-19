@@ -1,4 +1,4 @@
-@(bookForm: play.api.data.Form[models.Book])(implicit messages: play.api.i18n.Messages)
+@(bookForm: play.api.data.Form[String])(implicit messages: play.api.i18n.Messages)
 
 @import controllers.routes
 @import helper._
@@ -22,12 +22,12 @@
     <div class="mb-3">
         @helper.inputText(bookForm("isbn"), '_label -> "ISBN", 'class -> "form-control")
     </div>
-    <div class="mb-3">
-        @helper.inputText(bookForm("title"), '_label -> "Tytuł", 'class -> "form-control")
-    </div>
-    <div class="mb-3">
-        @helper.inputText(bookForm("author"), '_label -> "Autor", 'class -> "form-control")
-    </div>
+<!--    <div class="mb-3">-->
+<!--        @helper.inputText(bookForm("title"), '_label -> "Tytuł", 'class -> "form-control")-->
+<!--    </div>-->
+<!--    <div class="mb-3">-->
+<!--        @helper.inputText(bookForm("author"), '_label -> "Autor", 'class -> "form-control")-->
+<!--    </div>-->
 
     <button type="submit" class="btn btn-primary">Dodaj książkę</button>
     }

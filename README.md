@@ -50,7 +50,9 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 ### API
 
-- [ ] Wybrać API
+- [x] Wybrać API
+- [x] Dodać dodawanie przez API
+  - [ ] Dodać wyszukiwanie za pomocą tytułu przez API?
 
 
 ## Jak uruchomić

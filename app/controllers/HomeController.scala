@@ -43,7 +43,8 @@ class HomeController @Inject()(
       case None => List.empty // not logged in -> show empty list
     }
 
-    val books: List[Book] = bookRepository.findAll()
+    val userIsbns: Set[String] = bookEntries.map(_.isbn).toSet
+    val books: List[Book] = bookRepository.findAll().filter(book => userIsbns.contains(book.isbn))
 
     Ok(views.html.index(bookEntries, books, None, maybeUsername))
   }
@@ -57,7 +58,8 @@ class HomeController @Inject()(
       case None => List.empty // not logged in -> show empty list
     }
 
-    val books = bookRepository.findAll()
+    val userIsbns: Set[String] = bookEntries.map(_.isbn).toSet
+    val books: List[Book] = bookRepository.findAll().filter(book => userIsbns.contains(book.isbn))
 
     val selectedBook: Option[(BookEntry, Book)] =
       for {

@@ -25,12 +25,12 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 - [x] Wyświetl książki
   - [x] Wyświetlaj BookEntries
-  - [ ] BookEntries wg. usera
-  - [ ] "Już masz tą książkę"
-  - [ ] "Ta książka nie istnieje, stwórz ją"
+  - [x] BookEntries wg. usera
+  - [x] "Już masz tą książkę"
+  - [x] "Ta książka nie istnieje"
+    - [ ] "stwórz ją!!!!"
 - [x] Dodaj książkę
 - [x] Pokaż detale w prawym panelu
-- [ ] AddBook ma dodawać do BookRepository, dane mają się wyświetlać z BookRepository?
 - [ ] Dodać edytowanie BookEntry w prawym panelu
 - [ ] Dodać usuwanie BookEntry
 - [ ] Dodać zapisywanie w LocalStorage dla guesta?

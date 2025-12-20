@@ -6,7 +6,11 @@ class BookEntryRepository {
   // Fake books for now
   private var bookEntries = List(
     BookEntry(1, 1, "9787201106380"),
-    BookEntry(2, 1, "9788393535873")
+    BookEntry(2, 1, "9788393535873"),
+    BookEntry(3, 2, "9788393535873"),
+    BookEntry(4, 3, "9788393535873"),
+    BookEntry(5, 1, "9780008668808"),
+    BookEntry(6, 1, "9780063277304")
   )
 
   def findAll(): List[BookEntry] =

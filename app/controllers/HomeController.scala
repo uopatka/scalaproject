@@ -49,15 +49,23 @@ class HomeController @Inject()(
   }
 
   def showBook(isbn: String) = Action { implicit request =>
-    val bookEntries = bookEntryRepository.findAll()
+    val maybeUsername: Option[String] = request.session.get("username")
+    val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
+
+    val bookEntries: List[BookEntry] = maybeUserId match {
+      case Some(userId) => bookEntryRepository.findAll().filter(_.userId == userId)
+      case None => List.empty // not logged in -> show empty list
+    }
+
     val books = bookRepository.findAll()
+
     val selectedBook: Option[(BookEntry, Book)] =
       for {
         entry <- bookEntries.find(_.isbn == isbn)
         book  <- books.find(_.isbn == isbn)
     } yield (entry, book)
 
-    Ok(views.html.index(bookEntries, books, selectedBook))
+    Ok(views.html.index(bookEntries, books, selectedBook, maybeUsername))
   }
 
   val bookForm: Form[String] = Form(

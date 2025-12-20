@@ -37,7 +37,10 @@ class HomeController @Inject()(
   def index() = Action { implicit request =>
     val bookEntries = bookEntryRepository.findAll()
     val books = bookRepository.findAll()
-    Ok(views.html.index(bookEntries, books)) // selectedBook = None by default
+
+    val maybeUsername: Option[String] = request.session.get("username")
+
+    Ok(views.html.index(bookEntries, books, None, maybeUsername)) // selectedBook = None by default
     // Q(AW): should I pass selectedBook = none explicitly?
   }
 

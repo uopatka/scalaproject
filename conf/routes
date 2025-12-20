@@ -3,7 +3,7 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# Home page
+# Homepage
 GET     /     controllers.HomeController.index()
 
 # Map static resources
@@ -15,3 +15,10 @@ GET     /book/:isbn                 controllers.HomeController.showBook(isbn: St
 # Add book form
 GET     /add-book                   controllers.HomeController.addBook()
 POST    /add-book                   controllers.HomeController.addBookSubmit()
+
+# Log in form
+GET     /login                  controllers.AuthController.loginPage()
+POST    /login                  controllers.AuthController.loginSubmit()
+
+# Log out
+GET     /logout                 controllers.AuthController.logout()

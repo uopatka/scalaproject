@@ -1,4 +1,7 @@
-@(bookEntries: List[models.BookEntry], books: List[models.Book], selectedBook: Option[(models.BookEntry, models.Book)] = None)
+@(bookEntries: List[models.BookEntry],
+books: List[models.Book],
+selectedBook: Option[(models.BookEntry, models.Book)] = None,
+username: Option[String] = None)
 
 @main("Strona główna") {
 <!-- kolory strony do zmiany w przyszłości -->
@@ -40,8 +43,16 @@
 
 <div class="container mt-4"> <div class="text-center mb-5">
     <h1 class="display-3">Moja biblioteczka</h1>
-    <br>
-    <a href="@routes.HomeController.addBook()" class="btn btn-light btn-lg">Dodaj książkę</a>
+
+    <div class="button-group">
+        <a href="@routes.HomeController.addBook()" class="btn btn-light btn-lg">Dodaj książkę</a>
+
+        @username.map { name =>
+            <span class="ml-2">Witaj, @name! <a href="@routes.AuthController.logout()">Wyloguj się</a></span>
+        }.getOrElse {
+            <a href="@routes.AuthController.loginPage()" class="btn btn-light btn-lg ml-2">Zaloguj się</a>
+        }
+    </div>
 </div>
 
     <div class="row">

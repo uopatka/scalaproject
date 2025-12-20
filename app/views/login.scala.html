@@ -1,0 +1,20 @@
+@(loginForm: play.api.data.Form[forms.LoginData])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+
+@import helper._
+
+@main("Login") {
+    <h1>Login</h1>
+
+    @helper.form(action = routes.AuthController.loginSubmit()) {
+        @CSRF.formField
+
+        @helper.inputText(loginForm("username"), '_label -> "Username")
+        @helper.inputPassword(loginForm("password"), '_label -> "Password")
+
+        <button type="submit">Login</button>
+
+        @loginForm.globalError.map { error =>
+            <p style="color:red;">@error.message</p>
+        }
+    }
+}

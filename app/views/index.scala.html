@@ -43,10 +43,10 @@ username: Option[String] = None)
 
 <div class="container mt-4"> <div class="text-center mb-5">
     <h1 class="display-3">Moja biblioteczka</h1>
+    <br>
 
-    <div class="button-group">
+    <div class="d-flex justify-content-center gap-3">
         <a href="@routes.HomeController.addBook()" class="btn btn-light btn-lg">Dodaj książkę</a>
-
         @username.map { name =>
             <span class="ml-2">Witaj, @name! <a href="@routes.AuthController.logout()">Wyloguj się</a></span>
         }.getOrElse {
@@ -58,7 +58,7 @@ username: Option[String] = None)
     <div class="row">
 
         <div class="col-md-7">
-            <div class="green-background-panel"> <!-- do dodania przyciski z tytułami książek -->
+            <div class="green-background-panel">
                 @if(bookEntries.isEmpty) {
                     <p>Brak książek.</p>
                 } else {

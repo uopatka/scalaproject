@@ -9,7 +9,7 @@
     <div class="text-center mb-5">
         <h1 class="display-3">Dodaj nową książkę</h1>
         <br>
-        <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary">Wróć do listy</a>
+        <a href="@routes.HomeController.index()" class="btn btn-light btn-lg">Wróć do listy</a>
     </div>
 
     @helper.form(action = routes.HomeController.addBookSubmit()) {
@@ -22,6 +22,7 @@
 
         <div class="mb-3">
             @helper.inputText(bookForm("isbn"), '_label -> "ISBN", 'class -> "form-control")
+            <small id="ISBNhelp" class="form-text text-muted">Numer ISBN znajduje się na odwrocie okładki</small>
         </div>
     <!--    <div class="mb-3">-->
     <!--        @helper.inputText(bookForm("title"), '_label -> "Tytuł", 'class -> "form-control")-->
@@ -30,7 +31,7 @@
     <!--        @helper.inputText(bookForm("author"), '_label -> "Autor", 'class -> "form-control")-->
     <!--    </div>-->
 
-        <button type="submit" class="btn btn-primary">Dodaj książkę</button>
+        <button type="submit" class="btn btn-primary btn-light">Dodaj książkę</button>
     }
 
 </div>

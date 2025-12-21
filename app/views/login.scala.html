@@ -5,23 +5,40 @@
 @main("Login") {
 <div class="container mt-4"> <div class="text-center mb-5">
     <h1 class="display-3">Login</h1>
+    <br>
+    <a href="@routes.HomeController.index()" class="btn btn-light btn-lg">Wróć do listy</a>
 </div>
+    <div class="container mt-5">
+        <div class="row justify-content-center"> <div class="col-md-4">
 
     @helper.form(action = routes.AuthController.loginSubmit()) {
         @CSRF.formField
 
-        @helper.inputText(loginForm("username"), '_label -> "Username")
-        @helper.inputPassword(loginForm("password"), '_label -> "Password")
-
-        <button type="submit">Login</button>
+        <div class = "mb-3">
+        @helper.inputText(
+            loginForm("username"),
+            '_label -> "Nazwa użytkownika",
+            'class -> "form-control",
+            'placeholder -> "Wpisz nazwę użytkownika",
+            '_showConstraints -> false)
+        @helper.inputPassword(
+            loginForm("password"),
+            '_label -> "Hasło",
+            'class -> "form-control",
+            'placeholder -> "Hasło",
+            '_showConstraints -> false)
+</div></div></div>
+        <div class="text-center mb-5">
+        <button type="submit" class="btn btn-primary btn-light">Login</button>
 
         @loginForm.globalError.map { error =>
             <p style="color:red;">@error.message</p>
         }
     }
 }
+</div> </div>
 <p> Niestety 😔, widać należę do tych 7 milionów skorumpowanych naukowców 🧪💰, którzy umówili się 🤝📜, by dla pieniędzy 💸💸 odrzucać wszelkie dowody 🚫🔍chociaż książki tych, co piszą o duszy 👻✨ sprzedają się znacznie lepiej 📚🔥 i to oni prawdziwe pieniądze zarabiają 🤑🤑,
     programy TV 📺 pełne są paranormalnych odkrywców 🔮🧿👽,
     homeopaci 💧⚗️ zarabiają na swoich roztworach 💦💦 znacznie więcej niż przemysł farmaceutyczny 💊🏭,
     bo ich badania nic nie kosztują ❌💵, a produkcja też 🏭🚫 za to ceny są wysokie 📈💎😎</p>
-</div>
+    </div>

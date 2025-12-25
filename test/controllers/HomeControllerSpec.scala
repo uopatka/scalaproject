@@ -2,8 +2,15 @@ package controllers
 
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import play.api.test._
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers
 
 /**
  * Add your spec here.
@@ -11,12 +18,27 @@ import play.api.test._
  *
  * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
  */
-class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
+class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar {
+
+  override def fakeApplication() = {
+    val bookRepo = new repositories.BookRepository()
+    val entryRepo = new repositories.BookEntryRepository()
+
+    val mockOpenLib = mock[services.OpenLibraryService]
+    when(mockOpenLib.fetchByIsbn(ArgumentMatchers.anyString())).thenReturn(Future.successful(None))
+
+    GuiceApplicationBuilder()
+      .overrides(
+        bind[repositories.BookRepository].toInstance(bookRepo),
+        bind[repositories.BookEntryRepository].toInstance(entryRepo),
+        bind[services.OpenLibraryService].toInstance(mockOpenLib)
+      ).build()
+  }
 
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
-      val controller = new HomeController(stubControllerComponents())
+      val controller = inject[HomeController]
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK

@@ -9,7 +9,9 @@ scalaVersion := "2.13.18"
 libraryDependencies ++= Seq(
   guice,
   "org.playframework" %% "play-ahc-ws" % "3.0.9",                     // <--- WS added
-  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2" % Test,
+  "com.typesafe.slick" %% "slick" % "3.5.2",
+  "org.postgresql" % "postgresql" % "42.7.3"
 )
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.example.controllers._"

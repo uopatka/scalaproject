@@ -35,6 +35,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - [ ] Dodać usuwanie BookEntry
 - [ ] Dodać zapisywanie dla guesta?
 - [ ] Dodać filtrowanie książek
+- [ ] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
 
 ### UI
 

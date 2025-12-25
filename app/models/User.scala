@@ -1,3 +1,3 @@
 package models
 
-case class User(id: Int, username: String, password: String)
+case class User(id: Long, username: String, password: String)

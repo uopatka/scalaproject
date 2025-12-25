@@ -18,7 +18,7 @@ class AuthController @Inject()(
   }
 
   def loginSubmit = Action.async { implicit request =>
-    LoginForm.form.bindFromRequest.fold(
+    LoginForm.form.bindFromRequest().fold(
       formWithErrors => {
 
         Future.successful(BadRequest(views.html.login(formWithErrors)))

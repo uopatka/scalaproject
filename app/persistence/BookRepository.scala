@@ -3,9 +3,11 @@ package persistence
 import models.Book
 import persistence.tables.Books
 import slick.jdbc.PostgresProfile.api._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
+import javax.inject._
 
-class BookRepository(db: Database) {
+@Singleton
+class BookRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
   private val table = TableQuery[Books]
 
   def insert(book: Book): Future[String] =
@@ -22,5 +24,8 @@ class BookRepository(db: Database) {
 
   def delete(isbn: String): Future[Int] =
     db.run(table.filter(_.isbn === isbn).delete)
+
+  def upsert(book: Book): Future[Int] =
+    db.run(table.insertOrUpdate(book))
 }
 

@@ -31,6 +31,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
     - [ ] "stwórz ją!!!!"
 - [x] Dodaj książkę
 - [x] Pokaż detale w prawym panelu
+- [ ] Na gościu nie widać książek
 - [ ] Dodać edytowanie BookEntry w prawym panelu
 - [ ] Dodać usuwanie BookEntry
 - [ ] Dodać zapisywanie dla guesta?
@@ -52,8 +53,8 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 ### Backend
 
-- [ ] DB
-- [ ] Przerzucić z repositories do DB
+- [x] DB
+- [x] Przerzucić z repositories do DB
 
 ### API
 
@@ -71,3 +72,15 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 ## Ikonki
 Na razie używamy https://www.svgrepo.com/collection/iconship-interface-icons
 Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icons
+
+## DB
+Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (your_username musi być waszym userem z linuxa):
+
+sudo -u postgres createuser -P your_username
+sudo -u postgres createdb -O your_username bugshelv
+
+export DB_URL="jdbc:postgresql://localhost:5432/bugshelv"
+export DB_USER="your_username"
+export DB_PASSWORD="your_password"
+
+psql "$DB_URL" -U "$DB_USER" -f create_tables.sql 

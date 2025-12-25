@@ -3,9 +3,11 @@ package persistence
 import models.BookEntry
 import persistence.tables.BookEntries
 import slick.jdbc.PostgresProfile.api._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
+import javax.inject._
 
-class BookEntryRepository(db: Database) {
+@Singleton
+class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
   private val table = TableQuery[BookEntries]
 
   def insert(entry: BookEntry): Future[Long] =

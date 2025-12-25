@@ -3,7 +3,8 @@ package controllers
 import play.api.mvc._
 import javax.inject._
 import forms.LoginForm
-import repositories.UserRepository
+import repositories.{UserRepository => TestUserRepository}
+import persistence.UserRepository
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -24,7 +25,7 @@ class AuthController @Inject()(
         Future.successful(BadRequest(views.html.login(formWithErrors)))
       },
       loginData => {
-        userRepo.findByUsername(loginData.username).map {
+        userRepo.getByUsername(loginData.username).map {
           case Some(user) if user.password == loginData.password =>
 
             Redirect("/").withSession(

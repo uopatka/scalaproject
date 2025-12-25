@@ -3,9 +3,11 @@ package persistence
 import models.User
 import persistence.tables.Users
 import slick.jdbc.PostgresProfile.api._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
+import javax.inject._
 
-class UserRepository(db: Database) {
+@Singleton
+class UserRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
   private val table = TableQuery[Users]
 
   def insert(user: User): Future[Long] =
@@ -13,6 +15,9 @@ class UserRepository(db: Database) {
 
   def getById(id: Long): Future[Option[User]] =
     db.run(table.filter(_.id === id).result.headOption)
+
+  def getByUsername(username: String): Future[Option[User]] =
+    db.run(table.filter(_.username === username).result.headOption)
 
   def getAll(): Future[Seq[User]] =
     db.run(table.result)

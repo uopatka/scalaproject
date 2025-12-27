@@ -45,7 +45,7 @@ class HomeController @Inject()(
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
       case None =>
-        Future.successful(List.empty)
+        bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
     for {
@@ -66,7 +66,7 @@ class HomeController @Inject()(
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
       case None =>
-        Future.successful(List.empty)
+        bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
     val userIsbnsF: Future[Set[String]] = bookEntriesF.map(_.map(_.isbn).toSet)

@@ -1,0 +1,72 @@
+@(selectedBook: (models.BookEntry, models.Book),
+username: Option[String] = None)
+
+@main(selectedBook._2.title) {
+
+<style>
+    .green-background-panel {
+        background-color: #4A9782;
+        padding: 20px;
+        border-radius: 4px;
+        min-height: 450px;
+        color: white;
+    }
+
+    .book-details img {
+        max-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .book-info {
+        margin-top: 20px;
+    }
+
+    .book-info p {
+        font-size: 1.1rem;
+    }
+
+    .btn-back {
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-end mb-3">
+        @username.map { name =>
+            <div class="user-info">
+                Witaj, <strong>@name</strong>!
+                <a href="@routes.AuthController.logout()" class="btn btn-outline-danger btn-sm ms-2">Wyloguj się</a>
+            </div>
+        }.getOrElse {
+            <a href="@routes.AuthController.loginPage()" class="btn btn-outline-primary btn-sm">Zaloguj się</a>
+        }
+    </div>
+
+    <div class="mb-3">
+        <a href="@routes.HomeController.index()" class="btn btn-light btn-back">
+            <i class="bi bi-arrow-left"></i> Powrót do listy książek
+        </a>
+    </div>
+
+    <div class="green-background-panel row">
+        <div class="col-md-5 text-center book-details">
+            @if(selectedBook._2.cover.nonEmpty) {
+                <img src="@selectedBook._2.cover" alt="Okładka książki" class="img-fluid mb-3">
+            }
+        </div>
+
+        <div class="col-md-7 book-info">
+            <h1>@selectedBook._2.title</h1>
+            <p><strong>Autor:</strong> @selectedBook._2.author</p>
+            <p><strong>ISBN:</strong> @selectedBook._2.isbn</p>
+            <p><strong>Rok publikacji:</strong> @selectedBook._2.publishYear</p>
+            <p><strong>Liczba stron:</strong> @selectedBook._2.pages</p>
+            <p><strong>Przeczytane strony:</strong> @selectedBook._1.pagesRead</p>
+            <p><strong>Status:</strong> @selectedBook._1.status</p>
+        </div>
+    </div>
+
+</div>
+}

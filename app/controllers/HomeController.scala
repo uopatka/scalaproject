@@ -161,16 +161,83 @@ class HomeController @Inject()(
   }
 
   def deleteBook(id: Long) = Action.async { implicit request =>
-    val maybeUserId: Option[Long] =
-      request.session.get("userId").map(_.toLong)
-
-    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
-
     bookEntryRepository.delete(id).map { _ =>
       Redirect(routes.HomeController.index())
     }
   }
 
+  def editBookEntry(id: Long) = Action.async { implicit request =>
+    for {
+      entryOpt <- bookEntryRepository.getById(id)
+      bookOpt <- entryOpt match {
+        case Some(entry) => bookRepository.getByIsbn(entry.isbn)
+        case None => Future.successful(None)
+      }
+    } yield {
+      (entryOpt, bookOpt) match {
+        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry((entry, book)))
+        case _ => NotFound("Książka nie znaleziona")
+      }
+    }
+  }
 
+  def editBookEntrySubmit() = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+
+    bookForm.bindFromRequest().fold(
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.addBook(formWithErrors))
+        ),
+
+      isbn => {
+        bookEntryRepository.getAll().map(_.exists(entry =>
+          entry.userId == userId && entry.isbn == isbn
+        )).flatMap { alreadyExists =>
+          if (alreadyExists) {
+            Future.successful(
+              BadRequest(
+                views.html.addBook(
+                  bookForm.withGlobalError("Ta książka jest już w Twojej bibliotece")
+                )
+              )
+            )
+          } else {
+            openLibraryService.fetchByIsbn(isbn).flatMap {
+              case Some(fetchedBook) =>
+                val ensureGuestF: Future[Unit] = if (userId == 0L) {
+                  userRepository.getById(0L).flatMap {
+                    case Some(_) => Future.successful(())
+                    case None    => userRepository.insert(User(0L, "guest", "")).map(_ => ())
+                  }
+                } else Future.successful(())
+
+                for {
+                  existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
+                  _ <- existsOpt match {
+                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
+                  }
+                  _ <- ensureGuestF
+                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, fetchedBook.isbn))
+                } yield Redirect(routes.HomeController.index())
+
+              case None =>
+                Future.successful(
+                  BadRequest(
+                    views.html.addBook(
+                      bookForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                    )
+                  )
+                )
+            }
+          }
+        }
+      }
+    )
+  }
 
 }

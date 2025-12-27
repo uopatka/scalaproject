@@ -94,6 +94,9 @@ username: Option[String] = None)
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-lg shadow-sm">
                         <i class="bi bi-plus-lg"></i> Usuń książkę
                     </a>
+                    <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-lg shadow-sm">
+                        <i class="bi bi-plus-lg"></i> Edytuj książkę
+                    </a>
                     @if(book.cover.nonEmpty) {
                         <div class="text-center mb-3">
                             <img
@@ -109,6 +112,7 @@ username: Option[String] = None)
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
                     <p><strong>Rok publikacji:</strong> @book.publishYear</p>
+                    <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
                     <p><strong>Liczba stron:</strong> @book.pages</p>
                     <p><strong>Status:</strong> @entry.status</p>
                 }.getOrElse {

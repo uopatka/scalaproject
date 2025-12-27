@@ -31,12 +31,12 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
     - [ ] "stwórz ją!!!!"
 - [x] Dodaj książkę
 - [x] Pokaż detale w prawym panelu
-- [ ] Na gościu nie widać książek
+- [x] Na gościu nie widać książek
 - [ ] Dodać edytowanie BookEntry w prawym panelu
 - [ ] Dodać usuwanie BookEntry
 - [x] Dodać zapisywanie dla guesta?
 - [ ] Dodać filtrowanie książek
-- [ ] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
+- [x] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
 
 ### UI
 

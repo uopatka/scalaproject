@@ -16,6 +16,9 @@ GET     /book/:isbn                 controllers.HomeController.showBook(isbn: St
 GET     /add-book                   controllers.HomeController.addBook()
 POST    /add-book                   controllers.HomeController.addBookSubmit()
 
+# Add book form
+GET     /delete-book                   controllers.HomeController.deleteBook(id: Long)
+
 # Log in form
 GET     /login                  controllers.AuthController.loginPage()
 POST    /login                  controllers.AuthController.loginSubmit()

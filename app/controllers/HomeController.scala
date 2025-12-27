@@ -160,6 +160,17 @@ class HomeController @Inject()(
     )
   }
 
+  def deleteBook(id: Long) = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+
+    bookEntryRepository.delete(id).map { _ =>
+      Redirect(routes.HomeController.index())
+    }
+  }
+
 
 
 }

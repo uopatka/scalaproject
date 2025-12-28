@@ -91,12 +91,15 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
         <div class="col-md-5">
             <div class="green-background-panel">
                 @selectedBook.map { case (entry, book) =>
+                <div class = "d-flex gap-2 from image" >
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-lg shadow-sm">
                         <i class="bi bi-plus-lg"></i> Usuń książkę
                     </a>
+
                     <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-lg shadow-sm">
                         <i class="bi bi-plus-lg"></i> Edytuj książkę
                     </a>
+                </div>
                     @if(book.cover.nonEmpty) {
                         <div class="text-center mb-3">
                             <img

@@ -35,3 +35,5 @@ POST    /login                          controllers.AuthController.loginSubmit()
 
 # Log out
 GET     /logout                         controllers.AuthController.logout()
+
+POST    /books/:entryId/editCover      controllers.HomeController.editBookCover(entryId: Long)

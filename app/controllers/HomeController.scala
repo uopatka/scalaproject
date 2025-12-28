@@ -106,7 +106,7 @@ class HomeController @Inject()(
     val maybeUserId: Option[Long] =
       request.session.get("userId").map(_.toLong)
 
-    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+    val userId: Long = maybeUserId.getOrElse(1L) // guest = 0
 
     bookForm.bindFromRequest().fold(
       formWithErrors =>
@@ -129,7 +129,7 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
-                val ensureGuestF: Future[Unit] = if (userId == 0L) {
+                val ensureGuestF: Future[Unit] = if (userId == 1L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
                     case None    => userRepository.insert(User(0L, "guest", "")).map(_ => ())
@@ -241,6 +241,35 @@ class HomeController @Inject()(
       }
     )
   }
+  def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
+    request.body.file("cover") match {
+      case Some(coverFile) =>
+        val filename = java.time.Instant.now().toEpochMilli + "_" + coverFile.filename
+        val filePath = s"public/uploads/$filename"
+        coverFile.ref.moveTo(new java.io.File(filePath), replace = true)
+
+        // Pobierz entry z repozytorium
+        bookEntryRepository.getById(entryId).flatMap {
+          case Some(entry) =>
+            // Pobierz książkę po ISBN
+            bookRepository.getByIsbn(entry.isbn).flatMap {
+              case Some(book) =>
+                val updatedBook = book.copy(cover = s"/assets/uploads/$filename")
+                bookRepository.update(updatedBook).map(_ =>
+                  Redirect(routes.HomeController.editBookEntry(entryId))
+                )
+              case None =>
+                Future.successful(NotFound("Nie znaleziono książki"))
+            }
+          case None =>
+            Future.successful(NotFound("Nie znaleziono wpisu książki"))
+        }
+
+      case None =>
+        Future.successful(BadRequest("Nie przesłano pliku okładki"))
+    }
+  }
+
 
   def updatePagesRead(id: Long) = Action { implicit request =>
     request.body.asFormUrlEncoded

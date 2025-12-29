@@ -63,10 +63,19 @@
       @if(book.cover.nonEmpty) {
         <img src="@book.cover" alt="Okładka książki" class="img-fluid mb-3">
 
-        <!-- Upload cover form -->
-        <form action="@routes.HomeController.editBookCover(entry.id)" method="POST" enctype="multipart/form-data" class="mt-2">
+        <!-- Upload new cover -->
+        <form action="@routes.HomeController.editBookCover(entry.id)"
+              method="POST" enctype="multipart/form-data"
+              class="mt-2">
+
             @helper.CSRF.formField
-            <input type="file" name="cover" accept="image/*" class="form-control mb-2" required>
+
+            <input type="file"
+                   name="cover"
+                   accept="image/*"
+                   class="form-control mb-2"
+                   required>
+
             <button type="submit" class="btn btn-primary btn-sm">Zmień okładkę</button>
         </form>
 

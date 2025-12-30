@@ -144,7 +144,10 @@ class HomeController @Inject()(
                     case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, bookWithCover.isbn))
+                  _ <- bookEntryRepository.insert(BookEntry(id = 0L,
+                    userId = userId,
+                    isbn = bookWithCover.isbn,
+                    altCover = bookWithCover.cover))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -246,34 +249,30 @@ class HomeController @Inject()(
 
   def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
     request.body.file("cover") match {
-      case Some(coverFile) =>
-        val filename = java.time.Instant.now().toEpochMilli + "_" + coverFile.filename
-        val filePath = s"public/uploads/$filename"
+      case Some(file) =>
+        val filename = java.time.Instant.now().toEpochMilli + "_" + file.filename
+        val path = s"public/uploads/$filename"
 
-        coverFile.ref.moveTo(new java.io.File(filePath),
+        file.ref.moveTo(new java.io.File(path),
           replace = true)
 
         // Getting the entry id
         bookEntryRepository.getById(entryId).flatMap {
           case Some(entry) =>
             // Get book's ISBN
-            bookRepository.getByIsbn(entry.isbn).flatMap {
-              case Some(book) =>
-                val updatedBook = book.copy(cover = s"/assets/uploads/$filename")
-
-                bookRepository.update(updatedBook).map(_ =>
-                  Redirect(routes.HomeController.editBookEntry(entryId))
-                )
-              case None =>
-                Future.successful(NotFound("Nie znaleziono książki"))
+            val updated = entry.copy(
+              altCover = s"/assets/uploads/$filename"
+            )
+            bookEntryRepository.update(updated).map { _ =>
+              Redirect(routes.HomeController.editBookEntry(entryId))
             }
           case None =>
-            Future.successful(NotFound("Nie znaleziono wpisu książki"))
+            Future.successful(NotFound("Nie znaleziono wpisu"))
         }
-
       case None =>
-        Future.successful(BadRequest("Nie przesłano pliku okładki"))
+        Future.successful(BadRequest("Nie przesłano pliku"))
     }
+
   }
 
 
@@ -312,6 +311,7 @@ class HomeController @Inject()(
     val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
     book.copy(cover = coverValue)
   }
+
 
 
 }

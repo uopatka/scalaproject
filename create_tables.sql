@@ -19,5 +19,6 @@ CREATE TABLE book_entries (
   isbn VARCHAR REFERENCES books(isbn),
   created_at TIMESTAMP WITHOUT TIME ZONE,
   status VARCHAR,
-  pages_read INTEGER
+  pages_read INTEGER,
+  alt_cover TEXT NOT NULL DEFAULT ''
 );

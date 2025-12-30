@@ -2,6 +2,7 @@
   book: models.Book,
   username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
+@import viewmodels.CoverResolver
 
 @main(book.title) {
 
@@ -61,7 +62,9 @@
     <!-- Cover -->
     <div class="col-md-5 text-center book-cover">
       @if(book.cover.nonEmpty) {
-        <img src="@book.cover" alt="Okładka książki" class="img-fluid mb-3">
+        <img src="@CoverResolver.resolve(entry, book)"
+             alt="Okładka książki"
+             class="img-fluid mb-3">
 
         <!-- Upload new cover -->
         <form action="@routes.HomeController.editBookCover(entry.id)"

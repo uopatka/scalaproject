@@ -93,7 +93,7 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
         <div class="col-md-5">
             <div class="green-background-panel">
                 @selectedBook.map { case (entry, book) =>
-                <div class="d-flex gap-2 mb-3">
+                <div class="mb-3">
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-lg shadow-sm">
                         Usuń książkę
                     </a>

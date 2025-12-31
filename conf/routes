@@ -18,6 +18,7 @@ POST    /add-book                       controllers.HomeController.addBookSubmit
 
 # Delete book
 GET     /delete-book                    controllers.HomeController.deleteBook(id: Long)
+POST    /delete-book                    controllers.HomeController.deleteBook(id: Long)
 
 # Edit book form
 GET     /edit-book-entry/:id            controllers.HomeController.editBookEntry(id: Long)

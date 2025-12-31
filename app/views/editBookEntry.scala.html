@@ -35,7 +35,6 @@
 </style>
 
 <div class="container mt-4">
-
   <!-- User bar -->
   <div class="d-flex justify-content-end mb-3">
     @username.map { name =>
@@ -61,7 +60,7 @@
 
     <!-- Cover -->
     <div class="col-md-5 text-center book-cover">
-      @if(book.cover.nonEmpty) {
+      @if(entry.altCover.nonEmpty || book.cover.nonEmpty) {
         <img src="@CoverResolver.resolve(entry, book)"
              alt="Okładka książki"
              class="img-fluid mb-3">

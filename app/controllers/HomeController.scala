@@ -151,7 +151,7 @@ class HomeController @Inject()(
                   _ <- bookEntryRepository.insert(BookEntry(id = 0L,
                     userId = userId,
                     isbn = bookWithCover.isbn,
-                    altCover = bookWithCover.cover))
+                    altCover = ""))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>

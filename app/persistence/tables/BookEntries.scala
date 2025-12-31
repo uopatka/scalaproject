@@ -14,8 +14,9 @@ class BookEntries(tag: Tag) extends Table[BookEntry](tag, "book_entries") {
     def createdAt = column[LocalDateTime]("created_at")
     def status = column[BookStatus]("status")
     def pagesRead = column[Int]("pages_read")
+    def altCover = column[String]("alt_cover") //corresponding to altCover in the model
 
-  def * = (id, userId, isbn, createdAt, status, pagesRead) <> (BookEntry.tupled, BookEntry.unapply)
+  def * = (id, userId, isbn, createdAt, status, pagesRead, altCover) <> (BookEntry.tupled, BookEntry.unapply)
 }
 
 object BookEntries {

@@ -3,6 +3,8 @@ books: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
 username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
+@import viewmodels.CoverResolver
+
 @main("Strona główna") {
 <!-- kolory strony do zmiany w przyszłości -->
 <style>
@@ -90,27 +92,29 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
         <div class="col-md-5">
             <div class="green-background-panel">
                 @selectedBook.map { case (entry, book) =>
-                <div class = "mb-3" >
+                <div class="mb-3">
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-lg shadow-sm">
-                        <i class="bi bi-plus-lg"></i> Usuń książkę
+                        Usuń książkę
                     </a>
-
                     <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-lg shadow-sm">
-                        <i class="bi bi-plus-lg"></i> Edytuj książkę
+                        Edytuj książkę
                     </a>
                 </div>
-                    @if(book.cover.nonEmpty) {
-                        <div class="text-center mb-3">
-                            <img
-                                    src="@book.cover"
-                                    alt="Okładka książki"
-                                    class="img-fluid rounded shadow"
-                                    style="max-height: 300px;"
-                            >
-                        </div>
-                    }
 
-                    <h3>@book.title</h3>
+
+                <div class="text-center mb-3">
+                    <img
+                            src= "@CoverResolver.resolve(entry, book)"
+                            alt="Okładka książki"
+                            class="img-fluid rounded shadow"
+                            style="max-height: 300px;"
+                    >
+                </div>
+
+
+
+
+                <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
                     <p><strong>Rok publikacji:</strong> @book.publishYear</p>

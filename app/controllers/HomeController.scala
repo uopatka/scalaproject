@@ -15,6 +15,9 @@ import repositories.{BookEntryRepository => TestBookEntryRepository}
 import persistence.BookRepository
 import persistence.BookEntryRepository
 import persistence.SlickColumnMappers._
+import java.nio.file.Paths
+import java.nio.file.Files
+import play.api.Configuration
 
 
 /**
@@ -27,7 +30,8 @@ class HomeController @Inject()(
                                 bookRepository: BookRepository,
                                 bookEntryRepository: BookEntryRepository,
                                 userRepository: persistence.UserRepository,
-                                openLibraryService: services.OpenLibraryService
+                                openLibraryService: services.OpenLibraryService,
+                                config: Configuration
                               )(implicit ec: ExecutionContext)
                                 extends BaseController with I18nSupport {
 
@@ -54,7 +58,7 @@ class HomeController @Inject()(
       booksSeq    <- bookRepository.getAll()
     } yield {
       val userIsbns = bookEntries.map(_.isbn).toSet
-      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).toList
+      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
       Ok(views.html.index(bookEntries, books, None, maybeUsername))
     }
   }
@@ -77,7 +81,7 @@ class HomeController @Inject()(
       userIsbns  <- userIsbnsF
       booksSeq   <- bookRepository.getAll()
     } yield {
-      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn))
+      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
 
       val selectedBook: Option[(BookEntry, Book)] =
         for {
@@ -129,6 +133,7 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
+                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -137,13 +142,16 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
+                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
+                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, fetchedBook.isbn))
+                  _ <- bookEntryRepository.insert(BookEntry(id = 0L,
+                    userId = userId,
+                    isbn = bookWithCover.isbn,
+                    altCover = ""))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -177,7 +185,7 @@ class HomeController @Inject()(
       }
     } yield {
       (entryOpt, bookOpt) match {
-        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, book, maybeUsername))
+        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, ensureCover(book), maybeUsername))
         case _ => NotFound("Książka nie znaleziona")
       }
     }
@@ -210,6 +218,7 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
+                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -218,13 +227,13 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
+                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
+                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, fetchedBook.isbn))
+                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, bookWithCover.isbn))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -241,6 +250,39 @@ class HomeController @Inject()(
       }
     )
   }
+
+  def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
+    request.body.file("cover") match {
+      case Some(file) =>
+        val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
+        val directory = Paths.get(config.get[String]("app.uploads.dir"))
+
+        Files.createDirectories(directory)
+
+        val path = directory.resolve(filename)
+
+        file.ref.moveTo(path, replace = true)
+
+        // Getting the entry id
+        bookEntryRepository.getById(entryId).flatMap {
+          case Some(entry) =>
+            // Get book's ISBN
+            val updated = entry.copy(
+              altCover = filename
+            )
+            bookEntryRepository.update(updated).map { _ =>
+              Redirect(routes.HomeController.editBookEntry(entryId))
+            }
+          case None =>
+            Files.deleteIfExists(path)
+            Future.successful(NotFound("Nie znaleziono wpisu"))
+        }
+      case None =>
+        Future.successful(BadRequest("Nie przesłano pliku"))
+    }
+
+  }
+
 
   def updatePagesRead(id: Long) = Action { implicit request =>
     request.body.asFormUrlEncoded
@@ -273,5 +315,21 @@ class HomeController @Inject()(
         BadRequest("Nieprawidłowy status")
     }
   }
+
+  private def ensureCover(book: Book): Book = {
+    val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
+    book.copy(cover = coverValue)
+  }
+
+  def serveUpload(filename: String) = Action {
+    val uploadDir = Paths.get(config.get[String]("app.uploads.dir"))
+    val file = uploadDir.resolve(filename).toFile
+
+    if (file.exists()) Ok.sendFile(file)
+    else NotFound("Nie znaleziono wpisu")
+  }
+
+
+
 
 }

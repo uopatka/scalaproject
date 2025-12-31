@@ -4,11 +4,13 @@ target/
 /.idea
 /.idea_modules
 /.classpath
+/.github
 /.project
 /.settings
 /.vscode
 /.metals
 /.bloop
+/public/uploads
 /project
 !/project/plugins.sbt
 !/project/build.properties

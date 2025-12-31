@@ -250,7 +250,7 @@ class HomeController @Inject()(
   def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
     request.body.file("cover") match {
       case Some(file) =>
-        val filename = java.time.Instant.now().toEpochMilli + "_" + file.filename
+        val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
         val path = s"public/uploads/$filename"
 
         file.ref.moveTo(new java.io.File(path),

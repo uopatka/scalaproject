@@ -1,0 +1,100 @@
+@(createBookForm: play.api.data.Form[forms.BookData], isbn: String)(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+
+@import controllers.routes
+@import helper._
+
+@main("Dodaj książkę ręcznie") {
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-3">Dodaj książkę ręcznie</h1>
+        <p class="text-muted">Wprowadź dane książki poniżej.</p>
+        <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary mb-3">
+            <i class="bi bi-arrow-left"></i> Wróć do listy
+        </a>
+    </div>
+
+    @helper.form(action = routes.HomeController.createBookSubmit(isbn)) {
+        @CSRF.formField
+
+        @* === Global errors === *@
+        @for(error <- createBookForm.globalErrors) {
+            <div class="alert alert-danger">@error.message</div>
+
+            @createBookForm.data.get("isbn").foreach { submittedIsbn =>
+                @if(error.message == "Nie znaleziono książki dla tego ISBN") {
+                    <a href="@routes.HomeController.createBook(submittedIsbn)"
+                       class="btn btn-warning btn-sm mt-2">
+                        Dodaj książkę ręcznie
+                    </a>
+                }
+            }
+        }
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("isbn"),
+                Symbol("_label") -> "ISBN",
+                Symbol("class") -> "form-control",
+                Symbol("readonly") -> "readonly"
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("title"),
+                Symbol("_label") -> "Tytuł",
+                Symbol("class") -> "form-control",
+                Symbol("placeholder") -> "Wpisz tytuł książki",
+                Symbol("_showConstraints") -> false
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("author"),
+                Symbol("_label") -> "Autor",
+                Symbol("class") -> "form-control",
+                Symbol("placeholder") -> "Wpisz autora książki",
+                Symbol("_showConstraints") -> false
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("publishYear"),
+                Symbol("_label") -> "Rok wydania",
+                Symbol("class") -> "form-control",
+                Symbol("placeholder") -> "Rok wydania"
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("pages"),
+                Symbol("_label") -> "Liczba stron",
+                Symbol("class") -> "form-control",
+                Symbol("placeholder") -> "Liczba stron"
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputText(
+                createBookForm("cover"),
+                Symbol("_label") -> "Okładka (URL)",
+                Symbol("class") -> "form-control",
+                Symbol("placeholder") -> "Adres URL okładki"
+            )
+        </div>
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    Dodaj książkę
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+}

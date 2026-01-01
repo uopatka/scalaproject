@@ -16,6 +16,7 @@ class BookEntries(tag: Tag) extends Table[BookEntry](tag, "book_entries") {
     def pagesRead = column[Int]("pages_read")
     def altCover = column[String]("alt_cover") //corresponding to altCover in the model
 
+  def pk = primaryKey("book_entries_pkey", id)
   def * = (id, userId, isbn, createdAt, status, pagesRead, altCover) <> (BookEntry.tupled, BookEntry.unapply)
 }
 

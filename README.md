@@ -6,7 +6,7 @@ Natalia Uścińska - frontend
 
 Paweł Witkowski
 
-Aleksandra Woźnica - scala, backend
+Aleksandra Woźnica - scala, backend, frontend
 
 ## Ważne
 Defaultowy branch (main) nazywa się play-framework, zapewne zmienimy w przyszłości nazwę na main.
@@ -24,7 +24,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 ### Scala
 
 - [ ] Dodaj książkę
-  - [ ] Stwórz książkę jak isbn nie jest w OpenLibrary
+  - [ ] Dodaj książkę bez ISBN
 - [ ] Dodać filtrowanie książek
 
 ### Frontend
@@ -33,6 +33,10 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
   - [ ] match case BookStatus -> na stronie ma być "w trakcie", "przeczytana" itp.
   - [ ] match case liczba stron -> na stronie ma być coś typu '-' lub 'brak informacji' gdy pobrane jest 0
 - [ ] Dodać filtrowanie książek
+- [ ] Form errors (ujednolicić, sprawić żeby się nie powtarzały itp.)
+  - [ ] logowanie
+  - [ ] dodawanie książki (sam ISBN)
+  - [ ] tworzenie książki
 
 ### API
 
@@ -86,6 +90,7 @@ Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icon
   - [x] "Już masz tą książkę"
   - [x] "Ta książka nie istnieje"
 - [x] Dodaj książkę
+  - [x] Stwórz książkę jak isbn nie jest w OpenLibrary
 - [x] Pokaż detale w prawym panelu
 - [x] Na gościu nie widać książek
 - [x] Dodać edytowanie BookEntry

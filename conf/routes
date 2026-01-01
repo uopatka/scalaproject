@@ -17,8 +17,8 @@ GET     /add-book                       controllers.HomeController.addBook()
 POST    /add-book                       controllers.HomeController.addBookSubmit()
 
 # Create book form
-GET     /create-book                    controllers.HomeController.createBook()
-POST    /create-book                    controllers.HomeController.createBookSubmit()
+GET     /create-book/:isbn              controllers.HomeController.createBook(isbn: String)
+POST    /create-book/:isbn              controllers.HomeController.createBookSubmit(isbn: String)
 
 # Delete book
 GET     /delete-book                    controllers.HomeController.deleteBook(id: Long)

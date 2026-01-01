@@ -14,42 +14,52 @@
         </a>
     </div>
 
-        <div class="row justify-content-center"> <div class="col-md-4">
-    @helper.form(action = routes.HomeController.addBookSubmit()) {
-        @CSRF.formField
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            @helper.form(action = routes.HomeController.addBookSubmit()) {
+                @CSRF.formField
 
-        @* Display form errors *@
-        @bookForm.globalErrors.map { error =>
-            <div class="alert alert-danger">@error.message</div>
-            
-            @if(error.message == "Nie znaleziono książki dla tego ISBN") {
-                <a href="@routes.HomeController.createBook()"
-                   class="btn btn-warning btn-sm mt-2">
-                   Dodaj książkę ręcznie
-                </a>
+                @* === Global errors === *@
+                @for(error <- bookForm.globalErrors) {
+                    <div class="alert alert-danger">@error.message</div>
+
+                    @bookForm.data.get("isbn").map { isbn =>
+                        @if(error.message == "Nie znaleziono książki dla tego ISBN") {
+                            <a href="@routes.HomeController.createBook(isbn)"
+                               class="btn btn-warning btn-sm mt-2">
+                                Dodaj książkę ręcznie
+                            </a>
+                        }
+                    }
+                }
+
+                @* === Field errors === *@
+                @for(error <- bookForm("isbn").errors) {
+                    <div class="alert alert-danger">@error.message</div>
+                }
+
+                <div class="mb-3">
+                    @helper.inputText(
+                        bookForm("isbn"),
+                        Symbol("_label") -> "ISBN",
+                        Symbol("class") -> "form-control",
+                        Symbol("placeholder") -> "Wpisz numer ISBN",
+                        Symbol("_showConstraints") -> false
+                    )
+                    <small class="form-text text-muted">
+                        Numer ISBN znajduje się na odwrocie okładki
+                    </small>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <button type="submit" class="btn btn-primary btn-light">
+                            Dodaj książkę
+                        </button>
+                    </div>
+                </div>
             }
-        }
-
-    <div class="mb-3">
-        @helper.inputText(bookForm("isbn"),
-        Symbol("_label") -> "ISBN",
-        Symbol("class") -> "form-control",
-        Symbol("placeholder") -> "Wpisz numer ISBN",
-        Symbol("_showConstraints") -> false
-        )
-        <small class="form-text text-muted">Numer ISBN znajduje się na odwrocie okładki</small>
+        </div>
     </div>
-    <!--    <div class="mb-3">-->
-    <!--        @helper.inputText(bookForm("title"), Symbol("_label") -> "Tytuł", Symbol("class") -> "form-control")-->
-    <!--    </div>-->
-    <!--    <div class="mb-3">-->
-    <!--        @helper.inputText(bookForm("author"), Symbol("_label") -> "Autor", Symbol("class") -> "form-control")-->
-    <!--    </div>-->
-            <div class="row justify-content-center"> <div class="col-md-5">
-        <button type="submit" class="btn btn-primary btn-light">Dodaj książkę</button>
-                </div> </div>
-
-    }
-</div> </div>
 </div>
 }

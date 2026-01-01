@@ -11,6 +11,7 @@ class Books(tag: Tag) extends Table[Book](tag, "books") {
   def pages = column[Int]("pages")
   def cover = column[String]("cover")
 
+  def pk = primaryKey("books_pkey", isbn)
   def * = (isbn, title, author, publishYear, pages, cover) <> (Book.tupled, Book.unapply)
 }
 

@@ -1,0 +1,39 @@
+@(registerForm: play.api.data.Form[forms.RegisterData])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+
+@import helper._
+
+@main("Register") {
+
+<div class="container mt-5" style="max-width: 400px;">
+    <h2 class="mb-4 text-center">Register</h2>
+
+    @helper.form(action = routes.AuthController.registerSubmit()) {
+        @CSRF.formField
+
+        @for(error <- registerForm.globalErrors) {
+            <div class="alert alert-danger">@error.message</div>
+        }
+
+        <div class="mb-3">
+            @helper.inputText(
+                registerForm("username"),
+                Symbol("_label") -> "Username",
+                Symbol("class") -> "form-control"
+            )
+        </div>
+
+        <div class="mb-3">
+            @helper.inputPassword(
+                registerForm("password"),
+                Symbol("_label") -> "Password",
+                Symbol("class") -> "form-control"
+            )
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Register
+        </button>
+    }
+</div>
+
+}

@@ -41,6 +41,10 @@ POST    /login                          controllers.AuthController.loginSubmit()
 # Log out
 GET     /logout                         controllers.AuthController.logout()
 
+# Register form
+GET     /register                       controllers.AuthController.registerPage()
+POST    /register                       controllers.AuthController.registerSubmit()
+
 # Edit cover
 POST    /books/:entryId/editCover       controllers.HomeController.editBookCover(entryId: Long)
 

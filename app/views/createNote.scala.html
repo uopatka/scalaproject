@@ -15,7 +15,12 @@
     </div>
 
     <div class="mb-3">
-        @textarea(noteForm("content"), '_label -> "Treść")
+        @textarea(
+        noteForm("content"),
+        '_label -> "Treść",
+        'class -> "form-control",
+        'rows ->6
+        )
     </div>
 
     <button class="btn btn-success">Zapisz</button>

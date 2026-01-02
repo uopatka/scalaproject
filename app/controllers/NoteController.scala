@@ -6,6 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import forms.{NoteForm, NoteData}  // <- konieczne importy
 import models.Note
 import persistence.NoteRepository
+import java.time.LocalDateTime
 
 @Singleton
 class NoteController @Inject()(
@@ -44,10 +45,10 @@ class NoteController @Inject()(
         NoteForm.form.bindFromRequest().fold(
           formWithErrors => Future.successful(BadRequest(views.html.editNote(formWithErrors, note))),
           noteData => {
-            val updatedNote = note.copy(title = noteData.title, content = noteData.content)
-            noteRepository.update(updatedNote).map(_ =>
+            val updatedNote = note.copy(title = noteData.title, content = noteData.content, updatedAt = LocalDateTime.now())
+            noteRepository.update(updatedNote).map { _ =>
               Redirect(routes.HomeController.showBookByEntryId(note.bookEntryId))
-            )
+            }
           }
         )
       case None => Future.successful(NotFound("Notatka nie istnieje"))

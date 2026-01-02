@@ -50,3 +50,19 @@ POST    /books/:entryId/editCover       controllers.HomeController.editBookCover
 
 # Serve files
 GET     /uploads/:filename              controllers.HomeController.serveUpload(filename: String)
+
+#Notes
+GET     /note/add/:bookEntryId          controllers.NoteController.add(bookEntryId: Long)
+POST    /note/add/:bookEntryId          controllers.NoteController.addSubmit(bookEntryId: Long)
+GET     /note/edit/:noteId              controllers.NoteController.edit(noteId: Long)
+POST    /note/edit/:noteId              controllers.NoteController.editSubmit(noteId: Long)
+POST    /note/delete/:noteId            controllers.NoteController.delete(noteId: Long)
+
+GET   /note/:id/edit     controllers.NoteController.edit(id: Long)
+POST  /note/:id/edit     controllers.NoteController.editSubmit(id: Long)
+
+GET /book-entry/:id controllers.HomeController.showBookByEntryId(id: Long)
+
+
+POST  /book/updatePages/:entryId       controllers.HomeController.updateBookPages(entryId: Long)
+POST  /book/updateYear/:entryId        controllers.HomeController.updateBookYear(entryId: Long)

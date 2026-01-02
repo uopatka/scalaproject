@@ -90,8 +90,52 @@
 
       <p><strong>Autor:</strong> @book.author</p>
       <p><strong>ISBN:</strong> @book.isbn</p>
-      <p><strong>Rok publikacji:</strong> @book.publishYear</p>
-      <p><strong>Liczba stron:</strong> @book.pages</p>
+
+        <details class="mb-3">
+            <summary>
+                Rok publikacji: @if(book.publishYear == 0) {Do uzupełnienia} else {@book.publishYear} ✏️
+            </summary>
+
+            <form action="@routes.HomeController.updateBookYear(entry.id)"
+                  method="POST"
+                  class="mt-2">
+
+                @helper.CSRF.formField
+
+                <input type="number"
+                       name="publishYear"
+                       min="0"
+                       max="@java.time.Year.now.getValue"
+                       value="@book.publishYear"
+                       class="form-control mb-2"
+                       required>
+
+                <button class="btn btn-success btn-sm">Zapisz</button>
+            </form>
+        </details>
+
+        <details class="mb-3">
+            <summary>
+                Liczba stron: @if(book.pages == 0) {Do uzupełnienia} else {@book.pages} ✏️
+            </summary>
+
+            <form action="@routes.HomeController.updateBookPages(entry.id)"
+                  method="POST"
+                  class="mt-2">
+
+                @helper.CSRF.formField
+
+                <input type="number"
+                       name="pages"
+                       min="0"
+                       max="5000"
+                       value="@book.pages"
+                       class="form-control mb-2"
+                       required>
+
+                <button class="btn btn-success btn-sm">Zapisz</button>
+            </form>
+        </details>
 
       <!-- Pages read (NO JS) -->
       <details class="mb-3">

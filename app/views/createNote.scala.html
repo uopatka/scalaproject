@@ -1,0 +1,30 @@
+@(noteForm: Form[forms.NoteData], bookEntryId: Long)(implicit request: MessagesRequestHeader)
+
+@import helper._
+
+@main("Dodaj notatkę") {
+
+<div class="container mt-4">
+    <h1>Dodaj notatkę</h1>
+
+    @helper.form(action = routes.NoteController.addSubmit(bookEntryId)) {
+    @CSRF.formField
+
+    <div class="mb-3">
+        @inputText(noteForm("title"), Symbol("_label") -> "Tytuł")
+    </div>
+
+    <div class="mb-3">
+        @textarea(
+        noteForm("content"),
+        Symbol("_label") -> "Treść",
+        Symbol("class") -> "form-control",
+        Symbol("rows") -> 6
+        )
+    </div>
+
+    <button class="btn btn-success">Zapisz</button>
+    }
+</div>
+
+}

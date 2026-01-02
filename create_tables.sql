@@ -22,3 +22,13 @@ CREATE TABLE book_entries (
   pages_read INTEGER,
   alt_cover TEXT NOT NULL DEFAULT ''
 );
+
+CREATE TABLE notes (
+    id BIGSERIAL PRIMARY KEY,
+    book_entry_id BIGINT NOT NULL REFERENCES book_entries(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES users(id),
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

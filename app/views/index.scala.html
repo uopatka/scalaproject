@@ -1,6 +1,7 @@
 @(bookEntries: List[models.BookEntry],
 books: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
+notes: Seq[models.Note] = Seq.empty,
 username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
 @import viewmodels.CoverResolver
@@ -101,28 +102,48 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
                     </a>
                 </div>
 
-
                 <div class="text-center mb-3">
                     <img
-                            src= "@CoverResolver.resolve(entry, book)"
+                            src="@CoverResolver.resolve(entry, book)"
                             alt="Okładka książki"
                             class="img-fluid rounded shadow"
                             style="max-height: 300px;"
                     >
                 </div>
 
-
-
-
                 <h3>@book.title</h3>
-                    <p><strong>Autor:</strong> @book.author</p>
-                    <p><strong>ISBN:</strong> @book.isbn</p>
-                    <p><strong>Rok publikacji:</strong> @book.publishYear</p>
-                    <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
-                    <p><strong>Liczba stron:</strong> @book.pages</p>
-                    <p><strong>Status:</strong> @entry.status</p>
+                <p><strong>Autor:</strong> @book.author</p>
+                <p><strong>ISBN:</strong> @book.isbn</p>
+                <p><strong>Rok publikacji:</strong> @book.publishYear</p>
+                <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
+                <p><strong>Liczba stron:</strong> @book.pages</p>
+                <p><strong>Status:</strong> @entry.status</p>
+
+                <hr>
+
+                <h4>Notatki</h4>
+                @if(notes.isEmpty) {
+                <p>Brak notatek do tej książki.</p>
+                } else {
+                @for(note <- notes) {
+                <div class="note-card mb-2 p-2 border rounded">
+                    <strong>@note.title</strong>
+                    <p>@note.content</p>
+                    <small>Utworzono: @note.createdAt, ostatnia edycja: @note.updatedAt</small>
+                    <div class="mt-1">
+                        <a href="@routes.NoteController.edit(note.id)" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                        <form action="@routes.NoteController.delete(note.id)" method="POST" style="display:inline;">
+                            @helper.CSRF.formField
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+                        </form>
+                    </div>
+                </div>
+                }
+                }
+                <a href="@routes.NoteController.add(entry.id)" class="btn btn-success btn-sm mt-2">Dodaj notatkę</a>
+
                 }.getOrElse {
-                    <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
+                <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
                 }
             </div>
         </div>

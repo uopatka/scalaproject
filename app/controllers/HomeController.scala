@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, BookEntry, User, BookStatus}
+import models.{Book, BookEntry, User, BookStatus, Note}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -18,6 +18,7 @@ import repositories.{BookEntryRepository => TestBookEntryRepository}
 import forms.CreateBookForm
 import persistence.BookRepository
 import persistence.BookEntryRepository
+import persistence.NoteRepository
 import persistence.SlickColumnMappers._
 import play.api.i18n.Messages
 
@@ -32,6 +33,7 @@ class HomeController @Inject()(
                                 bookEntryRepository: BookEntryRepository,
                                 userRepository: persistence.UserRepository,
                                 openLibraryService: services.OpenLibraryService,
+                                noteRepository: NoteRepository,
                                 config: Configuration
                               )(implicit ec: ExecutionContext)
                                 extends BaseController with I18nSupport {
@@ -60,7 +62,15 @@ class HomeController @Inject()(
     } yield {
       val userIsbns = bookEntries.map(_.isbn).toSet
       val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
-      Ok(views.html.index(bookEntries, books, None, maybeUsername))
+      val notes: Seq[Note] = Seq.empty
+      Ok(views.html.index(bookEntries, books, None, notes, maybeUsername))
+    }
+  }
+
+  def showBookByEntryId(entryId: Long) = Action.async { implicit request =>
+    bookEntryRepository.getById(entryId).flatMap {
+      case Some(entry) => showBook(entry.isbn).apply(request)
+      case None => Future.successful(NotFound("Nie znaleziono książki"))
     }
   }
 
@@ -81,16 +91,17 @@ class HomeController @Inject()(
       bookEntries <- bookEntriesF
       userIsbns  <- userIsbnsF
       booksSeq   <- bookRepository.getAll()
-    } yield {
       val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
-
-      val selectedBook: Option[(BookEntry, Book)] =
-        for {
-          entry <- bookEntries.find(_.isbn == isbn)
-          book  <- books.find(_.isbn == isbn)
-        } yield (entry, book)
-
-      Ok(views.html.index(bookEntries, books, selectedBook, maybeUsername))
+      selectedBook = for {
+        entry <- bookEntries.find(_.isbn == isbn)
+        book  <- books.find(_.isbn == isbn)
+      } yield (entry, book)
+      notes <- selectedBook match {
+        case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
+        case None => Future.successful(Seq.empty)
+      }
+    } yield {
+      Ok(views.html.index(bookEntries, books, selectedBook, notes, maybeUsername))
     }
   }
 

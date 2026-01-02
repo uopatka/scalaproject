@@ -1,0 +1,41 @@
+@(noteForm: play.api.data.Form[forms.NoteData], note: models.Note)(implicit request: MessagesRequestHeader)
+
+
+@import helper._
+@import forms.NoteData
+
+@main(s"Edytuj notatkę: ${note.title}") {
+
+<div class="container mt-4">
+    <h1>Edytuj notatkę</h1>
+
+    @helper.form(action = routes.NoteController.editSubmit(note.id)) {
+    @CSRF.formField
+
+    <div class="mb-3">
+        @helper.inputText(
+        noteForm("title"),
+        Symbol("_label") -> "Tytuł",
+        Symbol("class") -> "form-control"
+        )
+    </div>
+
+    <div class="mb-3">
+        @helper.textarea(
+        noteForm("content"),
+        Symbol("_label") -> "Treść",
+        Symbol("class") -> "form-control",
+        Symbol("rows") -> 6
+        )
+    </div>
+
+    <button type="submit" class="btn btn-success">Zapisz</button>
+
+    <a href="@routes.HomeController.showBookByEntryId(note.bookEntryId)"
+       class="btn btn-secondary ms-2">
+        Anuluj
+    </a>
+    }
+</div>
+
+}

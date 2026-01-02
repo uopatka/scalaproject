@@ -1,7 +1,8 @@
 @(bookEntries: List[models.BookEntry],
 books: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
-username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
+username: Option[String] = None,
+filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.RequestHeader)
 
 @import viewmodels.CoverResolver
 
@@ -62,6 +63,45 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
                 <i class="bi bi-plus-lg"></i> Dodaj książkę
             </a>
         </div>
+        <div class="dropdown mb-3">
+            <button class="btn btn-outline-secondary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                Filtruj według statusu
+            </button>
+
+            <ul class="dropdown-menu">
+                @defining(List(
+                ("all", "Wszystkie"),
+                ("to_read", "Planowane"),
+                ("reading", "Czytane"),
+                ("finished", "Przeczytane"),
+                ("dropped", "Porzucone")
+                )) { statuses =>
+
+                    @for((statusParam, label) <- statuses) {
+
+                        @defining(
+                        if (statusParam == "all") filters - "status" else filters + ("status" -> statusParam)
+                        ) { queryMap =>
+
+                            <li>
+                            <a class="dropdown-item @if(filters.get("status").contains(statusParam)) { active }"
+                                href="@(
+                                        routes.HomeController.index().url + 
+                                        (if (queryMap.nonEmpty) "?" + queryMap.map { case (k,v) => k + "=" + v }.mkString("&") else "")
+                                    )">
+                                @label
+                            </a>
+                            </li>
+
+                        }
+                    }
+                }
+            </ul>
+
+        </div>
     </div>
 
     <div class="row">
@@ -72,17 +112,19 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
                 } else {
                     @for(entry <- bookEntries) { <!-- trzeba to wycentrowac lol -->
                         @defining(books.find(_.isbn == entry.isbn)) { bookOpt =>
-                            <a href="@routes.HomeController.showBook(entry.isbn)"
-                               class="book-button
-                               @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
-                                @bookOpt.map { book =>
-
-                                    <strong>@book.title</strong><br>
-                                    <span class="book-author">@book.author</span>
-                                }.getOrElse {
-                                    <em>Nieznana książka (ISBN: @entry.isbn)</em>
-                                }
-                            </a>
+                            @defining(
+                                routes.HomeController.showBook(entry.isbn).url + 
+                                (if (filters.nonEmpty) "?" + filters.map { case (k,v) => k + "=" + v }.mkString("&") else "")
+                            ) { bookUrl =>
+                                <a href="@bookUrl" class="book-button @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
+                                    @bookOpt.map { book =>
+                                        <strong>@book.title</strong><br>
+                                        <span class="book-author">@book.author</span>
+                                    }.getOrElse {
+                                        <em>Nieznana książka (ISBN: @entry.isbn)</em>
+                                    }
+                                </a>
+                            }
                         }
                     }
                 }

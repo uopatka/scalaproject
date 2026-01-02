@@ -20,6 +20,7 @@ import persistence.BookRepository
 import persistence.BookEntryRepository
 import persistence.SlickColumnMappers._
 import play.api.i18n.Messages
+import views.html.addBook.f
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -47,6 +48,9 @@ class HomeController @Inject()(
     val maybeUsername: Option[String] = request.session.get("username")
     val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
+    val filters: Map[String, String] = request.queryString.map { case (k,v) => k -> v.head }
+    val statusFilter: Option[BookStatus] = filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
@@ -58,15 +62,27 @@ class HomeController @Inject()(
       bookEntries <- bookEntriesF
       booksSeq    <- bookRepository.getAll()
     } yield {
-      val userIsbns = bookEntries.map(_.isbn).toSet
-      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
-      Ok(views.html.index(bookEntries, books, None, maybeUsername))
+      val filteredEntries = statusFilter match {
+        case Some(status) => bookEntries.filter(_.status == status)
+        case None         => bookEntries
+      }
+
+      val userIsbns = filteredEntries.map(_.isbn).toSet
+      val filteredBooks = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
+      
+      Ok(views.html.index(filteredEntries, filteredBooks, None, maybeUsername, filters))
     }
   }
 
   def showBook(isbn: String) = Action.async { implicit request =>
     val maybeUsername: Option[String] = request.session.get("username")
     val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
+
+    val filters: Map[String, String] = request.queryString.map { 
+      case (k, v) => k -> v.head 
+    }
+
+    val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
 
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
@@ -75,22 +91,24 @@ class HomeController @Inject()(
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
-    val userIsbnsF: Future[Set[String]] = bookEntriesF.map(_.map(_.isbn).toSet)
-
     for {
       bookEntries <- bookEntriesF
-      userIsbns  <- userIsbnsF
       booksSeq   <- bookRepository.getAll()
     } yield {
-      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
+      val filteredEntries = statusFilter match {
+        case Some(status) => bookEntries.filter(_.status == status)
+        case None         => bookEntries
+      }
+      
+      val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
 
       val selectedBook: Option[(BookEntry, Book)] =
         for {
-          entry <- bookEntries.find(_.isbn == isbn)
-          book  <- books.find(_.isbn == isbn)
+          entry <- filteredEntries.find(_.isbn == isbn)
+          book  <- filteredBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
-      Ok(views.html.index(bookEntries, books, selectedBook, maybeUsername))
+      Ok(views.html.index(filteredEntries, filteredBooks, selectedBook, maybeUsername, filters))
     }
   }
 
@@ -329,10 +347,8 @@ class HomeController @Inject()(
 
         file.ref.moveTo(path, replace = true)
 
-        // Getting the entry id
         bookEntryRepository.getById(entryId).flatMap {
           case Some(entry) =>
-            // Get book's ISBN
             val updated = entry.copy(
               altCover = filename
             )
@@ -394,8 +410,4 @@ class HomeController @Inject()(
     if (file.exists()) Ok.sendFile(file)
     else NotFound("Nie znaleziono wpisu")
   }
-
-
-
-
 }

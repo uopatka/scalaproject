@@ -16,13 +16,17 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - **Play** https://www.playframework.com/
 - **Bootstrap 5** - do frontendu. Dokumentacja: https://getbootstrap.com/docs/5.0/getting-started/introduction/
 
-## Instalacja
+## Wymagania
 -  **sbt (ver. sbt-1.11.7)** należy pobrać ze strony: www.scala-sbt.org/download/
+- **postgreSQL** 
+- **Docker**
 
 ## Jak uruchomić
-1) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```
-2) Uruchom aplikację wpisując ```sbt run```
-3) Otwórz przeglądarkę i wejdź na http://localhost:9000/
+1) Skopiuj .env.sample, zapisz jako .env i uzupełnij swoimi zmiennymi
+2) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```
+3) Uruchom bazę danych ```docker compose up -d db```. Inicjalizacja tabel (tylko za pierwszym razem): ```docker exec -i bugshelv_db psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} < create_tables.sql```
+4) Uruchom aplikację wpisując ```sbt run```
+5) Otwórz przeglądarkę i wejdź na http://localhost:9000/
 
 ## DB 
 Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**). Musicie też mieć pobranego postgresql:

@@ -15,3 +15,4 @@ target/
 !/project/plugins.sbt
 !/project/build.properties
 /RUNNING_PID
+.env

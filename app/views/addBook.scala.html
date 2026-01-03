@@ -4,14 +4,21 @@
 @import helper._
 
 @main("Dodaj książkę") {
+<div class="position-absolute top-0 start-0 m-4">
+    <a href="@routes.HomeController.index()" class="text-decoration-none text-dark d-flex align-items-center">
+        <img src="@routes.Assets.versioned("images/bookworm.png")" 
+             alt="Bugshelv Icon" 
+             style="height: 40px; width: auto;" 
+             class="me-2">
+        <span class="h3 mb-0 fw-bold">Bugshelv</span>
+    </a>
+</div>
+
 
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-3">Dodaj nową książkę</h1>
         <p class="text-muted">Wprowadź dane poniżej, aby powiększyć swoją kolekcję.</p>
-        <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary">
-            <i class="bi bi-arrow-left"></i> Wróć do listy
-        </a>
     </div>
 
     <div class="row justify-content-center">

@@ -21,6 +21,7 @@ import persistence.BookEntryRepository
 import persistence.NoteRepository
 import persistence.SlickColumnMappers._
 import play.api.i18n.Messages
+import views.html.addBook.f
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -49,6 +50,20 @@ class HomeController @Inject()(
     val maybeUsername: Option[String] = request.session.get("username")
     val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
+    val filters: Map[String, String] =
+      request.queryString.view.mapValues(_.head).toMap
+
+    val statusFilter: Option[BookStatus] =
+      filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+
+    val sortParam: String = filters.getOrElse("sort", "title_asc")
+
+    val (sortField, sortOrder) = sortParam.split("_") match {
+      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
+      case Array(field)        => (field.toLowerCase, "asc")
+      case _                   => ("title", "asc")
+    }
+
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
@@ -60,10 +75,31 @@ class HomeController @Inject()(
       bookEntries <- bookEntriesF
       booksSeq    <- bookRepository.getAll()
     } yield {
-      val userIsbns = bookEntries.map(_.isbn).toSet
-      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
+      val filteredEntries = statusFilter match {
+        case Some(status) => bookEntries.filter(_.status == status)
+        case None         => bookEntries
+      }
+
+      val userIsbns = filteredEntries.map(_.isbn).toSet
+      val filteredBooks =
+        booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
+
+      val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
+        case ("title", "asc")  => filteredBooks.sortBy(_.title)
+        case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
+        case ("author", "asc") => filteredBooks.sortBy(_.author)
+        case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
+        case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
+        case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+        case _                 => filteredBooks
+      }
+      val sortedEntries = filteredEntries.sortBy(entry => 
+        sortedBooks.indexWhere(_.isbn == entry.isbn)
+      )
+
       val notes: Seq[Note] = Seq.empty
-      Ok(views.html.index(bookEntries, books, None, notes, maybeUsername))
+
+      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername, filters))
     }
   }
 
@@ -78,6 +114,19 @@ class HomeController @Inject()(
     val maybeUsername: Option[String] = request.session.get("username")
     val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
+    val filters: Map[String, String] = request.queryString.map { 
+      case (k, v) => k -> v.head 
+    }
+
+    val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+    val sortParam: String = filters.getOrElse("sort", "title_asc")
+
+    val (sortField, sortOrder) = sortParam.split("_") match {
+      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
+      case Array(field)        => (field.toLowerCase, "asc")
+      case _                   => ("title", "asc")
+    }
+
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
@@ -85,24 +134,43 @@ class HomeController @Inject()(
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
-    val userIsbnsF: Future[Set[String]] = bookEntriesF.map(_.map(_.isbn).toSet)
+    bookEntriesF.flatMap { bookEntries =>
+      bookRepository.getAll().flatMap { booksSeq =>
+        val filteredEntries = statusFilter match {
+          case Some(status) => bookEntries.filter(_.status == status)
+          case None         => bookEntries
+        }
 
-    for {
-      bookEntries <- bookEntriesF
-      userIsbns  <- userIsbnsF
-      booksSeq   <- bookRepository.getAll()
-      books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
-      
-      selectedBook = for {
-        entry <- bookEntries.find(_.isbn == isbn)
-        book  <- books.find(_.isbn == isbn)
-      } yield (entry, book)
-      notes <- selectedBook match {
-        case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
-        case None => Future.successful(Seq.empty)
+        val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
+
+        val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
+          case ("title", "asc")  => filteredBooks.sortBy(_.title)
+          case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
+          case ("author", "asc") => filteredBooks.sortBy(_.author)
+          case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
+          case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
+          case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+          case _                 => filteredBooks
+        }
+
+        val sortedEntries = filteredEntries.sortBy(entry => 
+          sortedBooks.indexWhere(_.isbn == entry.isbn)
+        )
+
+        val selectedBook: Option[(BookEntry, Book)] = for {
+          entry <- filteredEntries.find(_.isbn == isbn)
+          book  <- sortedBooks.find(_.isbn == isbn)
+        } yield (entry, book)
+
+        val notesF: Future[Seq[Note]] = selectedBook match {
+          case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
+          case None             => Future.successful(Seq.empty)
+        }
+
+        notesF.map { notes =>
+          Ok(views.html.index(sortedEntries, sortedBooks, selectedBook, notes, maybeUsername, filters))
+        }
       }
-    } yield {
-      Ok(views.html.index(bookEntries, books, selectedBook, notes, maybeUsername))
     }
   }
 
@@ -341,10 +409,8 @@ class HomeController @Inject()(
 
         file.ref.moveTo(path, replace = true)
 
-        // Getting the entry id
         bookEntryRepository.getById(entryId).flatMap {
           case Some(entry) =>
-            // Get book's ISBN
             val updated = entry.copy(
               altCover = filename
             )
@@ -452,8 +518,4 @@ class HomeController @Inject()(
     if (file.exists()) Ok.sendFile(file)
     else NotFound("Nie znaleziono wpisu")
   }
-
-
-
-
 }

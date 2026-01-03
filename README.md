@@ -25,7 +25,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 3) Otwórz przeglądarkę i wejdź na http://localhost:9000/
 
 ## DB 
-Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**):
+Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**). Musicie też mieć pobranego postgresql:
 
 ```
 sudo -u postgres createuser -P your_username

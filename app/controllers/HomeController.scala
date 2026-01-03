@@ -82,6 +82,13 @@ class HomeController @Inject()(
     }
   }
 
+  def showBookByEntryId(entryId: Long) = Action.async { implicit request =>
+    bookEntryRepository.getById(entryId).flatMap {
+      case Some(entry) => showBook(entry.isbn).apply(request)
+      case None => Future.successful(NotFound("Nie znaleziono książki"))
+    }
+  }
+
   def showBook(isbn: String) = Action.async { implicit request =>
     val maybeUsername: Option[String] = request.session.get("username")
     val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
@@ -99,24 +106,31 @@ class HomeController @Inject()(
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
-    for {
-      bookEntries <- bookEntriesF
-      booksSeq   <- bookRepository.getAll()
-    } yield {
-      val filteredEntries = statusFilter match {
-        case Some(status) => bookEntries.filter(_.status == status)
-        case None         => bookEntries
-      }
-      
-      val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
+    bookEntriesF.flatMap { bookEntries =>
+      bookRepository.getAll().flatMap { booksSeq =>
+        val filteredEntries = statusFilter match {
+          case Some(status) => bookEntries.filter(_.status == status)
+          case None         => bookEntries
+        }
 
-      val selectedBook: Option[(BookEntry, Book)] =
-        for {
+        val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
+
+        val selectedBook: Option[(BookEntry, Book)] = for {
           entry <- filteredEntries.find(_.isbn == isbn)
           book  <- filteredBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
-      Ok(views.html.index(filteredEntries, filteredBooks, selectedBook, notes, maybeUsername, filters))
+        // Get notes as Future
+        val notesF: Future[Seq[Note]] = selectedBook match {
+          case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
+          case None             => Future.successful(Seq.empty)
+        }
+
+        // Map notes Future to final Result
+        notesF.map { notes =>
+          Ok(views.html.index(filteredEntries, filteredBooks, selectedBook, notes, maybeUsername, filters))
+        }
+      }
     }
   }
 

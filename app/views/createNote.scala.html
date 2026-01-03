@@ -4,27 +4,46 @@
 
 @main("Dodaj notatkę") {
 
-<div class="container mt-4">
-    <h1>Dodaj notatkę</h1>
-
-    @helper.form(action = routes.NoteController.addSubmit(bookEntryId)) {
-    @CSRF.formField
-
-    <div class="mb-3">
-        @inputText(noteForm("title"), Symbol("_label") -> "Tytuł")
+    <div class="position-absolute top-0 start-0 m-4">
+        <a href="@routes.HomeController.index()" class="text-decoration-none text-dark d-flex align-items-center">
+            <img src="@routes.Assets.versioned("images/bookworm.png")" 
+                 alt="Bugshelv Icon" 
+                 style="height: 40px; width: auto;" 
+                 class="me-2">
+            <span class="h3 mb-0 fw-bold">Bugshelv</span>
+        </a>
     </div>
 
-    <div class="mb-3">
-        @textarea(
-        noteForm("content"),
-        Symbol("_label") -> "Treść",
-        Symbol("class") -> "form-control",
-        Symbol("rows") -> 6
-        )
+    <div class="container" style="margin-top: 100px;"> <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                
+                <h1 class="mb-4 text-center">Dodaj notatkę</h1>
+
+                @helper.form(action = routes.NoteController.addSubmit(bookEntryId)) {
+                    @CSRF.formField
+
+                    <div class="mb-3">
+                        @inputText(
+                            noteForm("title"), 
+                            Symbol("_label") -> "Tytuł",
+                            Symbol("class") -> "form-control"
+                        )
+                    </div>
+
+                    <div class="mb-3">
+                        @textarea(
+                            noteForm("content"),
+                            Symbol("_label") -> "Treść",
+                            Symbol("class") -> "form-control",
+                            Symbol("rows") -> 6
+                        )
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg">Zapisz</button>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
-
-    <button class="btn btn-success">Zapisz</button>
-    }
-</div>
-
 }

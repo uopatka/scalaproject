@@ -28,7 +28,7 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
         color: white;
         text-decoration: none;
         transition: background-color 0.2s ease;
-        margin: 10px
+        margin: 10px auto;
         }
 
         .book-button:hover {
@@ -76,7 +76,7 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
         <div class="row">
             <div class="col-md-7">
-                <div class="green-background-panel">
+                <div class="green-background-panel d-flex flex-column align-items-center">
                     @if(bookEntries.isEmpty) {
                         <p>Brak książek.</p>
                     } else {

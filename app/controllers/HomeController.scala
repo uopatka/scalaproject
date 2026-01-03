@@ -56,6 +56,14 @@ class HomeController @Inject()(
     val statusFilter: Option[BookStatus] =
       filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
 
+    val sortParam: String = filters.getOrElse("sort", "title_asc")
+
+    val (sortField, sortOrder) = sortParam.split("_") match {
+      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
+      case Array(field)        => (field.toLowerCase, "asc")
+      case _                   => ("title", "asc")
+    }
+
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
@@ -76,9 +84,22 @@ class HomeController @Inject()(
       val filteredBooks =
         booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
 
+      val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
+        case ("title", "asc")  => filteredBooks.sortBy(_.title)
+        case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
+        case ("author", "asc") => filteredBooks.sortBy(_.author)
+        case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
+        case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
+        case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+        case _                 => filteredBooks
+      }
+      val sortedEntries = filteredEntries.sortBy(entry => 
+        sortedBooks.indexWhere(_.isbn == entry.isbn)
+      )
+
       val notes: Seq[Note] = Seq.empty
 
-      Ok(views.html.index(filteredEntries, filteredBooks, selectedBook = None, notes, maybeUsername))
+      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername))
     }
   }
 
@@ -98,6 +119,13 @@ class HomeController @Inject()(
     }
 
     val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+    val sortParam: String = filters.getOrElse("sort", "title_asc")
+
+    val (sortField, sortOrder) = sortParam.split("_") match {
+      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
+      case Array(field)        => (field.toLowerCase, "asc")
+      case _                   => ("title", "asc")
+    }
 
     val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
       case Some(userId) =>
@@ -115,20 +143,32 @@ class HomeController @Inject()(
 
         val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
 
+        val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
+          case ("title", "asc")  => filteredBooks.sortBy(_.title)
+          case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
+          case ("author", "asc") => filteredBooks.sortBy(_.author)
+          case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
+          case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
+          case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+          case _                 => filteredBooks
+        }
+
+        val sortedEntries = filteredEntries.sortBy(entry => 
+          sortedBooks.indexWhere(_.isbn == entry.isbn)
+        )
+
         val selectedBook: Option[(BookEntry, Book)] = for {
           entry <- filteredEntries.find(_.isbn == isbn)
-          book  <- filteredBooks.find(_.isbn == isbn)
+          book  <- sortedBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
-        // Get notes as Future
         val notesF: Future[Seq[Note]] = selectedBook match {
           case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
           case None             => Future.successful(Seq.empty)
         }
 
-        // Map notes Future to final Result
         notesF.map { notes =>
-          Ok(views.html.index(filteredEntries, filteredBooks, selectedBook, notes, maybeUsername, filters))
+          Ok(views.html.index(sortedEntries, sortedBooks, selectedBook, notes, maybeUsername, filters))
         }
       }
     }

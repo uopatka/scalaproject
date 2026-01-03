@@ -1,5 +1,5 @@
 @(bookEntries: List[models.BookEntry],
-books: List[models.Book],
+sortedBooks: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
 notes: Seq[models.Note] = Seq.empty,
 username: Option[String] = None,
@@ -143,7 +143,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                     <p>Brak książek.</p>
                 } else {
                     @for(entry <- bookEntries) { <!-- trzeba to wycentrowac lol -->
-                        @defining(books.find(_.isbn == entry.isbn)) { bookOpt =>
+                        @defining(sortedBooks.find(_.isbn == entry.isbn)) { bookOpt =>
                             @defining(
                                 routes.HomeController.showBook(entry.isbn).url +
                                 (if (filters.nonEmpty) "?" + filters.map { case (k,v) => k + "=" + v }.mkString("&") else "")
@@ -221,6 +221,5 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         </div>
     </div>
 </div>
-
-    }
+}
 }

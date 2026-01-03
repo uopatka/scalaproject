@@ -99,7 +99,7 @@ class HomeController @Inject()(
 
       val notes: Seq[Note] = Seq.empty
 
-      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername))
+      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername, filters))
     }
   }
 

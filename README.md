@@ -2,7 +2,7 @@
 
 Julia Masiarz
 
-Natalia Uścińska - frontend
+Natalia Uścińska - frontend, Docker
 
 Paweł Witkowski
 
@@ -24,7 +24,8 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 ## Jak uruchomić
 1) Skopiuj .env.sample, zapisz jako .env i uzupełnij swoimi zmiennymi
 2) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```
-3) Uruchom bazę danych ```docker compose up -d db```. Inicjalizacja tabel (tylko za pierwszym razem): ```docker exec -i bugshelv_db psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} < create_tables.sql```
+3) Uruchom bazę danych ```docker compose up -d db```. Inicjalizacja tabel (tylko za pierwszym razem) Wersja na Linuxa: ```docker exec -i bugshelv_db psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} < create_tables.sql``` 
+Wersja na Windowsa: ```Get-Content create_tables.sql | docker exec -i bugshelv_db psql -U NAZWA_UŻYTKOWNIKA_Z_ENV -d bugshelv```
 4) Uruchom aplikację wpisując ```sbt run```
 5) Otwórz przeglądarkę i wejdź na http://localhost:9000/
 

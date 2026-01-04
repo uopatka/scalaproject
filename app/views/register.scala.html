@@ -6,6 +6,10 @@
 
 <div class="position-absolute top-0 start-0 m-4">
     <a href="@routes.HomeController.index()" class="text-decoration-none text-dark d-flex align-items-center">
+        <img src="@routes.Assets.versioned("images/left-svgrepo-com.png")"
+        alt="Arrow Icon"
+        style="height: 40px; width: auto;"
+        class="me-1">
         <img src="@routes.Assets.versioned("images/bookworm.png")" 
              alt="Bugshelv Icon" 
              style="height: 40px; width: auto;" 
@@ -18,7 +22,7 @@
     <h2 class="display-3 text-center">Rejestracja</h2> 
 
     <div class="text-center mb-3">
-    <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary">Wróć do listy</a>
+    <a href="@routes.AuthController.loginPage()" class="btn btn-light btn-secondary">Wróć do logowania</a>
     </div>
 
     @helper.form(action = routes.AuthController.registerSubmit()) {
@@ -31,7 +35,7 @@
         <div class="mb-3">
             @helper.inputText(
                 registerForm("username"),
-                Symbol("_label") -> "Username",
+                Symbol("_label") -> "Nazwa użytkownika",
                 Symbol("class") -> "form-control"
             )
         </div>
@@ -39,7 +43,7 @@
         <div class="mb-3">
             @helper.inputPassword(
                 registerForm("password"),
-                Symbol("_label") -> "Password",
+                Symbol("_label") -> "Hasło",
                 Symbol("class") -> "form-control"
             )
         </div>

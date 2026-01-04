@@ -91,51 +91,61 @@
       <p><strong>Autor:</strong> @book.author</p>
       <p><strong>ISBN:</strong> @book.isbn</p>
 
-        <details class="mb-3">
-            <summary>
-                Rok publikacji: @if(book.publishYear == 0) {Do uzupełnienia} else {@book.publishYear} ✏️
-            </summary>
+        <!-- Year of publishing -->
+        @if(book.publishYear == 0) {
+            <details class="mb-3">
+                <summary>
+                    Rok publikacji: Do uzupełnienia ✏️
+                </summary>
 
-            <form action="@routes.HomeController.updateBookYear(entry.id)"
-                  method="POST"
-                  class="mt-2">
+                <form action="@routes.HomeController.updateBookYear(entry.id)"
+                      method="POST"
+                      class="mt-2">
 
-                @helper.CSRF.formField
+                    @helper.CSRF.formField
 
-                <input type="number"
-                       name="publishYear"
-                       min="0"
-                       max="@java.time.Year.now.getValue"
-                       value="@book.publishYear"
-                       class="form-control mb-2"
-                       required>
+                    <input type="number"
+                           name="publishYear"
+                           min="0"
+                           max="@java.time.Year.now.getValue"
+                           value="@book.publishYear"
+                           class="form-control mb-2"
+                           required>
 
-                <button class="btn btn-success btn-sm">Zapisz</button>
-            </form>
-        </details>
+                    <button class="btn btn-success btn-sm">Zapisz</button>
+                </form>
+            </details>
+        } else {
+        <p><strong>Rok publikacji:</strong> @book.publishYear</p>
+        }
 
-        <details class="mb-3">
-            <summary>
-                Liczba stron: @if(book.pages == 0) {Do uzupełnienia} else {@book.pages} ✏️
-            </summary>
+        <!-- Pages in the book -->
+        @if(book.pages == 0) {
+            <details class="mb-3">
+                <summary>
+                    Liczba stron: Do uzupełnienia ✏️
+                </summary>
 
-            <form action="@routes.HomeController.updateBookPages(entry.id)"
-                  method="POST"
-                  class="mt-2">
+                <form action="@routes.HomeController.updateBookPages(entry.id)"
+                      method="POST"
+                      class="mt-2">
 
-                @helper.CSRF.formField
+                    @helper.CSRF.formField
 
-                <input type="number"
-                       name="pages"
-                       min="0"
-                       max="5000"
-                       value="@book.pages"
-                       class="form-control mb-2"
-                       required>
+                    <input type="number"
+                           name="pages"
+                           min="0"
+                           max="5000"
+                           value="@book.pages"
+                           class="form-control mb-2"
+                           required>
 
-                <button class="btn btn-success btn-sm">Zapisz</button>
-            </form>
-        </details>
+                    <button class="btn btn-success btn-sm">Zapisz</button>
+                </form>
+            </details>
+        } else {
+        <p><strong>Liczba stron:</strong> @book.pages</p>
+        }
 
       <!-- Pages read (NO JS) -->
       <details class="mb-3">

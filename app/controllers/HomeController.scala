@@ -55,6 +55,8 @@ class HomeController @Inject()(
 
     val statusFilter: Option[BookStatus] =
       filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+    
+    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
 
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
@@ -83,17 +85,30 @@ class HomeController @Inject()(
       val userIsbns = filteredEntries.map(_.isbn).toSet
       val filteredBooks =
         booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
+      
+      val titleFilteredBooks = titleQuery match {
+        case Some(query) =>
+          val lowerCaseQuery = query.toLowerCase
+          filteredBooks.filter { book =>
+            book.title.toLowerCase.contains(lowerCaseQuery)
+          }
+        case None => filteredBooks
+      } 
+
+      val titleFilteredIsbns = titleFilteredBooks.map(_.isbn).toSet
+      val titleFilteredEntries =
+        filteredEntries.filter(entry => titleFilteredIsbns.contains(entry.isbn))
 
       val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
-        case ("title", "asc")  => filteredBooks.sortBy(_.title)
-        case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
-        case ("author", "asc") => filteredBooks.sortBy(_.author)
-        case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
-        case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
-        case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
-        case _                 => filteredBooks
+        case ("title", "asc")  => titleFilteredBooks.sortBy(_.title)
+        case ("title", "desc") => titleFilteredBooks.sortBy(_.title)(Ordering[String].reverse)
+        case ("author", "asc") => titleFilteredBooks.sortBy(_.author)
+        case ("author", "desc") => titleFilteredBooks.sortBy(_.author)(Ordering[String].reverse)
+        case ("year", "asc")   => titleFilteredBooks.sortBy(_.publishYear)
+        case ("year", "desc")  => titleFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+        case _                 => titleFilteredBooks
       }
-      val sortedEntries = filteredEntries.sortBy(entry => 
+      val sortedEntries = titleFilteredEntries.sortBy(entry => 
         sortedBooks.indexWhere(_.isbn == entry.isbn)
       )
 
@@ -119,6 +134,7 @@ class HomeController @Inject()(
     }
 
     val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
     val (sortField, sortOrder) = sortParam.split("_") match {
@@ -143,22 +159,35 @@ class HomeController @Inject()(
 
         val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
 
+        val titleFilteredBooks = titleQuery match {
+          case Some(query) =>
+            val lowerCaseQuery = query.toLowerCase
+            filteredBooks.filter { book =>
+              book.title.toLowerCase.contains(lowerCaseQuery)
+            }
+          case None => filteredBooks
+        } 
+
+        val titleFilteredIsbns = titleFilteredBooks.map(_.isbn).toSet
+        val titleFilteredEntries =
+          filteredEntries.filter(entry => titleFilteredIsbns.contains(entry.isbn))
+
         val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
-          case ("title", "asc")  => filteredBooks.sortBy(_.title)
-          case ("title", "desc") => filteredBooks.sortBy(_.title)(Ordering[String].reverse)
-          case ("author", "asc") => filteredBooks.sortBy(_.author)
-          case ("author", "desc") => filteredBooks.sortBy(_.author)(Ordering[String].reverse)
-          case ("year", "asc")   => filteredBooks.sortBy(_.publishYear)
-          case ("year", "desc")  => filteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
-          case _                 => filteredBooks
+          case ("title", "asc")  => titleFilteredBooks.sortBy(_.title)
+          case ("title", "desc") => titleFilteredBooks.sortBy(_.title)(Ordering[String].reverse)
+          case ("author", "asc") => titleFilteredBooks.sortBy(_.author)
+          case ("author", "desc") => titleFilteredBooks.sortBy(_.author)(Ordering[String].reverse)
+          case ("year", "asc")   => titleFilteredBooks.sortBy(_.publishYear)
+          case ("year", "desc")  => titleFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
+          case _                 => titleFilteredBooks
         }
 
-        val sortedEntries = filteredEntries.sortBy(entry => 
+        val sortedEntries = titleFilteredEntries.sortBy(entry => 
           sortedBooks.indexWhere(_.isbn == entry.isbn)
         )
 
         val selectedBook: Option[(BookEntry, Book)] = for {
-          entry <- filteredEntries.find(_.isbn == isbn)
+          entry <- titleFilteredEntries.find(_.isbn == isbn)
           book  <- sortedBooks.find(_.isbn == isbn)
         } yield (entry, book)
 

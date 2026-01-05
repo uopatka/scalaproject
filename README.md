@@ -1,6 +1,11 @@
-#### <div style="text-align: right"> Projekt końcowy na _Programowanie w języku Scala_</div>
+<div style="text-align:right; font-weight:bold;"> 
+    Projekt końcowy na <em>Programowanie w języku Scala</em>
+</div>
+
 <h1 style="text-align:center; font-size:3em; margin-bottom:0.2em;"> 
-    <a href="https://github.com/your-repo" style="color:OliveDrab; text-decoration:none;">Bugshelv 🕮</a>
+    <a href="https://bugshelv.aiwo.pl" style="color:OliveDrab; text-decoration:none;">
+        🕮 Bugshelv
+    </a>
 </h1>
 
 ### Zespół:

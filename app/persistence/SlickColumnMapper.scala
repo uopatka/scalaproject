@@ -3,7 +3,7 @@ package persistence
 import slick.jdbc.PostgresProfile.api._
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
-import models.BookStatus
+import models.{BookStatus, EntryType}
 import java.time.LocalDateTime
 
 object SlickColumnMappers {
@@ -18,9 +18,14 @@ object SlickColumnMappers {
   // BookStatus <-> String
   implicit val bookStatusColumnType: JdbcType[BookStatus] with BaseTypedType[BookStatus] =
     MappedColumnType.base[BookStatus, String](
-      // Convert BookStatus to String for DB
       bs => bs.value,
-      // Convert String from DB to BookStatus
       str => BookStatus.fromString{str}.getOrElse(throw new IllegalArgumentException(s"Invalid BookStatus: $str"))
+    )
+
+  // EntryType <-> String
+  implicit val entryTypeColumnType: JdbcType[models.EntryType] with BaseTypedType[EntryType] =
+    MappedColumnType.base[models.EntryType, String](
+      et => et.value,
+      str => models.EntryType.fromString(str)
     )
 }

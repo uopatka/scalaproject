@@ -1,27 +1,27 @@
 package persistence
 
-import models.BookEntry
+import models.Entry
 import models.BookStatus
 import persistence.SlickColumnMappers._
-import persistence.tables.BookEntries
+import persistence.tables.Entries
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Future, ExecutionContext}
 import javax.inject._
 
 @Singleton
 class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
-  private val table = TableQuery[BookEntries]
+  private val table = TableQuery[Entries]
 
-  def insert(entry: BookEntry): Future[Long] =
+  def insert(entry: Entry): Future[Long] =
     db.run((table returning table.map(_.id)) += entry)
 
-  def getById(id: Long): Future[Option[BookEntry]] =
+  def getById(id: Long): Future[Option[Entry]] =
     db.run(table.filter(_.id === id).result.headOption)
 
-  def getAll(): Future[Seq[BookEntry]] =
+  def getAll(): Future[Seq[Entry]] =
     db.run(table.result)
 
-  def update(entry: BookEntry): Future[Int] =
+  def update(entry: Entry): Future[Int] =
     db.run(table.filter(_.id === entry.id).update(entry))
 
   def delete(id: Long): Future[Int] =

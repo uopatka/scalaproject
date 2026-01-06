@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 final case class Note(
                       id: Long,
-                      bookEntryId: Long,
+                      entryId: Long,
                       userId: Long,
                       title: String,
                       content: String,

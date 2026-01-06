@@ -1,4 +1,4 @@
-@(noteForm: Form[forms.NoteData], bookEntryId: Long)(implicit request: MessagesRequestHeader)
+@(noteForm: Form[forms.NoteData], entryId: Long)(implicit request: MessagesRequestHeader)
 
 @import helper._
 
@@ -19,7 +19,7 @@
                 
                 <h1 class="mb-4 text-center">Dodaj notatkę</h1>
 
-                @helper.form(action = routes.NoteController.addSubmit(bookEntryId)) {
+                @helper.form(action = routes.NoteController.addSubmit(entryId)) {
                     @CSRF.formField
 
                     <div class="mb-3">

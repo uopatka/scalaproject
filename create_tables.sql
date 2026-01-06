@@ -13,22 +13,27 @@ CREATE TABLE users (
   password VARCHAR NOT NULL
 );
 
-CREATE TABLE book_entries (
+CREATE TABLE entries (
   id SERIAL PRIMARY KEY,
-  user_id BIGINT REFERENCES users(id),
-  isbn VARCHAR REFERENCES books(isbn),
-  created_at TIMESTAMP WITHOUT TIME ZONE,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  entry_type VARCHAR NOT NULL,
+  ref_id VARCHAR NOT NULL,
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status VARCHAR,
-  pages_read INTEGER,
+  pages_read INTEGER DEFAULT 0,
   alt_cover TEXT NOT NULL DEFAULT ''
 );
 
+
+CREATE INDEX idx_entries_type_ref ON entries (entry_type, ref_id);
+CREATE INDEX idx_entries_user ON entries (user_id);
+
 CREATE TABLE notes (
-    id BIGSERIAL PRIMARY KEY,
-    book_entry_id BIGINT NOT NULL REFERENCES book_entries(id) ON DELETE CASCADE,
-    user_id BIGINT REFERENCES users(id),
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  id BIGSERIAL PRIMARY KEY,
+  entry_id BIGINT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  user_id BIGINT REFERENCES users(id),
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

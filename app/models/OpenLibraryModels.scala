@@ -4,10 +4,10 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 
-case class OpenLibraryAuthor(name: String)
-case class OpenLibraryCover(medium: Option[String])
+final case class OpenLibraryAuthor(name: String)
+final case class OpenLibraryCover(medium: Option[String])
 
-case class OpenLibraryBook(
+final case class OpenLibraryBook(
                             title: String,
                             authors: Seq[OpenLibraryAuthor],
                             publishDate: Option[String],

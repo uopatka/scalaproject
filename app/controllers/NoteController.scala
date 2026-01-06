@@ -14,18 +14,18 @@ class NoteController @Inject()(
                                 noteRepository: NoteRepository
                               )(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
 
-  def add(bookEntryId: Long) = Action { implicit request =>
-    Ok(views.html.createNote(NoteForm.form, bookEntryId)) // <- NoteForm.form!
+  def add(entryId: Long) = Action { implicit request =>
+    Ok(views.html.createNote(NoteForm.form, entryId)) // <- NoteForm.form!
   }
 
-  def addSubmit(bookEntryId: Long) = Action.async { implicit request =>
+  def addSubmit(entryId: Long) = Action.async { implicit request =>
     NoteForm.form.bindFromRequest().fold(
-      formWithErrors => Future.successful(BadRequest(views.html.createNote(formWithErrors, bookEntryId))),
+      formWithErrors => Future.successful(BadRequest(views.html.createNote(formWithErrors, entryId))),
       noteData => {
         val userId = request.session.get("userId").map(_.toLong).getOrElse(0L)
-        val note = Note(0L, bookEntryId, userId, noteData.title, noteData.content)
+        val note = Note(0L, entryId, userId, noteData.title, noteData.content)
         noteRepository.create(note).map(_ =>
-          Redirect(routes.HomeController.showBookByEntryId(bookEntryId))
+          Redirect(routes.HomeController.showBookByEntryId(entryId))
         )
       }
     )
@@ -47,7 +47,7 @@ class NoteController @Inject()(
           noteData => {
             val updatedNote = note.copy(title = noteData.title, content = noteData.content, updatedAt = LocalDateTime.now())
             noteRepository.update(updatedNote).map { _ =>
-              Redirect(routes.HomeController.showBookByEntryId(note.bookEntryId))
+              Redirect(routes.HomeController.showBookByEntryId(note.entryId))
             }
           }
         )
@@ -58,7 +58,7 @@ class NoteController @Inject()(
   def delete(noteId: Long) = Action.async { implicit request =>
     noteRepository.findById(noteId).flatMap {
       case Some(note) => noteRepository.delete(noteId).map(_ =>
-        Redirect(routes.HomeController.showBookByEntryId(note.bookEntryId))
+        Redirect(routes.HomeController.showBookByEntryId(note.entryId))
       )
       case None => Future.successful(NotFound("Notatka nie istnieje"))
     }

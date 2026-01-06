@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, BookEntry, User, BookStatus, Note}
+import models.{Book, Entry, User, BookStatus, Note}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -14,7 +14,7 @@ import play.api.Configuration
 import javax.inject._
 
 import repositories.{BookRepository => TestBookRepository}
-import repositories.{BookEntryRepository => TestBookEntryRepository}
+import repositories.{EntryRepository => TestEntryRepository}
 import forms.CreateBookForm
 import persistence.BookRepository
 import persistence.BookEntryRepository
@@ -22,6 +22,7 @@ import persistence.NoteRepository
 import persistence.SlickColumnMappers._
 import play.api.i18n.Messages
 import views.html.addBook.f
+import models.Entry
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -67,7 +68,7 @@ class HomeController @Inject()(
       case _                   => ("title", "asc")
     }
 
-    val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
+    val entriesF: Future[List[Entry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
       case None =>
@@ -75,17 +76,17 @@ class HomeController @Inject()(
     }
 
     for {
-      bookEntries <- bookEntriesF
+      entries <- entriesF
       booksSeq    <- bookRepository.getAll()
     } yield {
       val filteredEntries = statusFilter match {
-        case Some(status) => bookEntries.filter(_.status == status)
-        case None         => bookEntries
+        case Some(status) => entries.filter(_.status == status)
+        case None         => entries
       }
 
-      val userIsbns = filteredEntries.map(_.isbn).toSet
+      val userRefIds = filteredEntries.map(_.refId).toSet
       val filteredBooks =
-        booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
+        booksSeq.filter(b => userRefIds.contains(b.isbn)).map(ensureCover).toList
       
       val titleFilteredBooks = titleQuery match {
         case Some(query) =>
@@ -107,7 +108,7 @@ class HomeController @Inject()(
 
       val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
       val finalFilteredEntries =
-        filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.isbn))
+        filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
 
       val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
         case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -119,7 +120,7 @@ class HomeController @Inject()(
         case _                 => finalFilteredBooks
       }
       val sortedEntries = finalFilteredEntries.sortBy(entry => 
-        sortedBooks.indexWhere(_.isbn == entry.isbn)
+        sortedBooks.indexWhere(_.isbn == entry.refId)
       )
 
       val notes: Seq[Note] = Seq.empty
@@ -130,7 +131,7 @@ class HomeController @Inject()(
 
   def showBookByEntryId(entryId: Long) = Action.async { implicit request =>
     bookEntryRepository.getById(entryId).flatMap {
-      case Some(entry) => showBook(entry.isbn).apply(request)
+      case Some(entry) => showBook(entry.refId).apply(request)
       case None => Future.successful(NotFound("Nie znaleziono książki"))
     }
   }
@@ -156,21 +157,21 @@ class HomeController @Inject()(
       case _                   => ("title", "asc")
     }
 
-    val bookEntriesF: Future[List[BookEntry]] = maybeUserId match {
+    val entriesF: Future[List[Entry]] = maybeUserId match {
       case Some(userId) =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
       case None =>
         bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
-    bookEntriesF.flatMap { bookEntries =>
+    entriesF.flatMap { entries =>
       bookRepository.getAll().flatMap { booksSeq =>
         val filteredEntries = statusFilter match {
-          case Some(status) => bookEntries.filter(_.status == status)
-          case None         => bookEntries
+          case Some(status) => entries.filter(_.status == status)
+          case None         => entries
         }
 
-        val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.isbn).toSet.contains(b.isbn)).map(ensureCover).toList
+        val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.refId).toSet.contains(b.isbn)).map(ensureCover).toList
 
         val titleFilteredBooks = titleQuery match {
           case Some(query) =>
@@ -192,7 +193,7 @@ class HomeController @Inject()(
 
         val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
         val finalFilteredEntries =
-          filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.isbn))
+          filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
 
         val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
           case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -205,11 +206,11 @@ class HomeController @Inject()(
         }
 
         val sortedEntries = finalFilteredEntries.sortBy(entry => 
-          sortedBooks.indexWhere(_.isbn == entry.isbn)
+          sortedBooks.indexWhere(_.isbn == entry.refId)
         )
 
-        val selectedBook: Option[(BookEntry, Book)] = for {
-          entry <- finalFilteredEntries.find(_.isbn == isbn)
+        val selectedBook: Option[(Entry, Book)] = for {
+          entry <- finalFilteredEntries.find(_.refId == isbn)
           book  <- sortedBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
@@ -252,7 +253,7 @@ class HomeController @Inject()(
 
       isbn => {
         bookEntryRepository.getAll().map(_.exists(entry =>
-          entry.userId == userId && entry.isbn == isbn
+          entry.userId == userId && entry.refId == isbn
         )).flatMap { alreadyExists =>
           if (alreadyExists) {
             val boundForm = bookForm.bindFromRequest()
@@ -281,9 +282,10 @@ class HomeController @Inject()(
                     case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(id = 0L,
+                  _ <- bookEntryRepository.insert(Entry(id = 0L,
                     userId = userId,
-                    isbn = bookWithCover.isbn,
+                    entryType = models.EntryType.Book,
+                    refId = bookWithCover.isbn,
                     altCover = ""))
                 } yield Redirect(routes.HomeController.index())
 
@@ -351,10 +353,11 @@ class HomeController @Inject()(
             pages = finalBookData.pages,
             cover = finalBookData.cover
           )).flatMap { _ =>
-            bookEntryRepository.insert(BookEntry(
+            bookEntryRepository.insert(Entry(
               id = 0L,
               userId = userId,
-              isbn = finalBookData.isbn,
+              entryType = models.EntryType.Book,
+              refId = finalBookData.isbn,
               altCover = ""
             ))
           }.map { _ =>
@@ -377,7 +380,7 @@ class HomeController @Inject()(
     for {
       entryOpt <- bookEntryRepository.getById(id)
       bookOpt <- entryOpt match {
-        case Some(entry) => bookRepository.getByIsbn(entry.isbn)
+        case Some(entry) => bookRepository.getByIsbn(entry.refId)
         case None => Future.successful(None)
       }
     } yield {
@@ -402,7 +405,7 @@ class HomeController @Inject()(
 
       isbn => {
         bookEntryRepository.getAll().map(_.exists(entry =>
-          entry.userId == userId && entry.isbn == isbn
+          entry.userId == userId && entry.refId == isbn
         )).flatMap { alreadyExists =>
           if (alreadyExists) {
             Future.successful(
@@ -430,7 +433,7 @@ class HomeController @Inject()(
                     case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, bookWithCover.isbn))
+                  _ <- bookEntryRepository.insert(Entry(0L, userId, models.EntryType.Book, bookWithCover.isbn))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -504,7 +507,7 @@ class HomeController @Inject()(
           entryOpt <- bookEntryRepository.getById(entryId)
           _ <- entryOpt match {
             case Some(entry) =>
-              bookRepository.getByIsbn(entry.isbn).flatMap {
+              bookRepository.getByIsbn(entry.refId).flatMap {
                 case Some(book) =>
                   bookRepository.update(book.copy(pages = pages))
                 case None => Future.successful(0)
@@ -527,7 +530,7 @@ class HomeController @Inject()(
           entryOpt <- bookEntryRepository.getById(entryId)
           _ <- entryOpt match {
             case Some(entry) =>
-              bookRepository.getByIsbn(entry.isbn).flatMap {
+              bookRepository.getByIsbn(entry.refId).flatMap {
                 case Some(book) =>
                   bookRepository.update(book.copy(publishYear = year))
                 case None => Future.successful(0)

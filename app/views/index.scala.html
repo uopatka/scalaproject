@@ -1,6 +1,6 @@
-@(bookEntries: List[models.BookEntry],
+@(entries: List[models.Entry],
 sortedBooks: List[models.Book],
-selectedBook: Option[(models.BookEntry, models.Book)] = None,
+selectedBook: Option[(models.Entry, models.Book)] = None,
 notes: Seq[models.Note] = Seq.empty,
 username: Option[String] = None,
 filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.RequestHeader)
@@ -81,7 +81,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div class="col-md-7">
 
             @* Filtry POWYŻEJ kontenera *@
-            @if(bookEntries.nonEmpty) {
+            @if(entries.nonEmpty) {
             <div class="d-flex justify-content-start gap-2 mb-3">
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -181,21 +181,21 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
             @* Zielony kontener z książkami *@
             <div class="green-background-panel d-flex flex-column align-items-center">
-                @if(bookEntries.isEmpty) {
+                @if(entries.isEmpty) {
                 <p>Brak książek.</p>
                 } else {
-                @for(entry <- bookEntries) {
-                @defining(sortedBooks.find(_.isbn == entry.isbn)) { bookOpt =>
+                @for(entry <- entries) {
+                @defining(sortedBooks.find(_.isbn == entry.refId)) { bookOpt =>
                 @defining(
-                routes.HomeController.showBook(entry.isbn).url +
+                routes.HomeController.showBook(entry.refId).url +
                 (if (filters.nonEmpty) "?" + filters.map { case (k,v) => k + "=" + v }.mkString("&") else "")
                 ) { bookUrl =>
-                <a href="@bookUrl" class="book-button @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
+                <a href="@bookUrl" class="book-button @if(selectedBook.exists(_._1.refId == entry.refId)) { active }">
                     @bookOpt.map { book =>
                     <strong>@book.title</strong><br>
                     <span class="book-author">@book.author</span>
                     }.getOrElse {
-                    <em>Nieznana książka (ISBN: @entry.isbn)</em>
+                    <em>Nieznana książka (ISBN: @entry.refId)</em>
                     }
                 </a>
                 }
@@ -207,7 +207,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
 
         <div class="col-md-5">
-            <div class="green-background-panel @if(bookEntries.nonEmpty){mt-5}">
+            <div class="green-background-panel @if(entries.nonEmpty){mt-5}">
                 @selectedBook.map { case (entry, book) =>
                 <div class="mb-3">
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm">Usuń</a>

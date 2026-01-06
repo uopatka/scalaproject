@@ -16,8 +16,8 @@ class NoteRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
   def create(note: Note): Future[Long] =
     db.run((table returning table.map(_.id)) += note)
 
-  def findByBookEntry(bookEntryId: Long): Future[Seq[Note]] =
-    db.run(table.filter(_.bookEntryId === bookEntryId).sortBy(_.createdAt.desc).result)
+  def findByBookEntry(entryId: Long): Future[Seq[Note]] =
+    db.run(table.filter(_.entryId === entryId).sortBy(_.createdAt.desc).result)
 
   def findById(id: Long): Future[Option[Note]] =
     db.run(table.filter(_.id === id).result.headOption)

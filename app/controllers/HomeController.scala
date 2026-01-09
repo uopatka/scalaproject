@@ -524,19 +524,25 @@ class HomeController @Inject()(
       .flatMap(_.get("tags").flatMap(_.headOption))
 
     tagsOpt match {
-      case Some(tags) =>
-        for {
-          entryOpt <- bookEntryRepository.getById(entryId)
-          _ <- entryOpt match {
-            case Some(entry) =>
-              bookRepository.getByIsbn(entry.refId).flatMap {
-                case Some(book) =>
-                  bookEntryRepository.update(entry.copy(tags = tags))
-                case None => Future.successful(0)
-              }
-            case None => Future.successful(0)
-          }
-        } yield Redirect(routes.HomeController.editBookEntry(entryId))
+      case Some(newTag) =>
+        bookEntryRepository.getById(entryId).flatMap {
+          case Some(entry) =>
+            val existingTags = entry.tags.split(", ").map(_.trim).filter(_.nonEmpty)
+            val updatedTags = 
+              if (existingTags.contains(newTag)) 
+                entry.tags
+              else if (entry.tags.isEmpty)
+                newTag
+              else
+                s"${entry.tags}, $newTag"
+            
+            bookEntryRepository
+              .update(entry.copy(tags = updatedTags))
+              .map(_ => Redirect(routes.HomeController.editBookEntry(entryId)))
+
+          case None =>
+            Future.successful(NotFound("Nie znaleziono wpisu"))
+        }
       case None => Future.successful(BadRequest("Nieprawidłowe tagi"))
     }
   }

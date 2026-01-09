@@ -212,7 +212,7 @@
       <!-- Tags -->
       <details class="mb-3">
         <summary>
-          Tagi: @entry.tags.mkString(", ") ✏️
+          Tagi: @entry.tags ✏️
         </summary>
 
         <form action="@routes.HomeController.updateTags(entry.id)"
@@ -223,7 +223,6 @@
 
           <input type="text"
                  name="tags"
-                 value="@entry.tags"
                  class="form-control mb-2"
                  required>
 

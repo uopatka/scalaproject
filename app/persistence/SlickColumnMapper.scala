@@ -5,6 +5,7 @@ import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import models.{BookStatus, EntryType}
 import java.time.LocalDateTime
+import java.time.LocalDate
 
 object SlickColumnMappers {
 
@@ -13,6 +14,13 @@ object SlickColumnMappers {
     MappedColumnType.base[LocalDateTime, java.sql.Timestamp](
       ldt => java.sql.Timestamp.valueOf(ldt),
       ts => ts.toLocalDateTime
+    )
+
+  // LocalDate <-> java.sql.Date
+  implicit val localDateColumnType: JdbcType[LocalDate] with BaseTypedType[LocalDate] =
+    MappedColumnType.base[LocalDate, java.sql.Date](
+      java.sql.Date.valueOf,
+      _.toLocalDate
     )
 
   // BookStatus <-> String

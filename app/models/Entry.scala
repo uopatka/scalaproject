@@ -1,6 +1,6 @@
 package models
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 final case class Entry(
   id: Long,
@@ -10,5 +10,6 @@ final case class Entry(
   createdAt: LocalDateTime = LocalDateTime.now(),
   status: BookStatus = BookStatus.ToRead,
   pagesRead: Int = 0,
-  altCover: String = ""
+  altCover: String = "",
+  finishedAt: Option[LocalDate] = None
 )

@@ -12,6 +12,7 @@ import java.nio.file.Paths
 import java.nio.file.Files
 import play.api.Configuration
 import javax.inject._
+import java.time.LocalDate
 
 import repositories.{BookRepository => TestBookRepository}
 import repositories.{EntryRepository => TestEntryRepository}
@@ -542,25 +543,32 @@ class HomeController @Inject()(
     }
   }
 
-  def updateStatus(id: Long) = Action { implicit request =>
+  def updateStatus(entryId: Long) = Action.async { implicit request =>
+    val form = request.body.asFormUrlEncoded.getOrElse(Map.empty)
+
     val statusOpt: Option[BookStatus] =
-      for {
-        form <- request.body.asFormUrlEncoded
-        value <- form.get("status").flatMap(_.headOption)
-        status <- BookStatus.fromString(value.toLowerCase)
-      } yield status
+      form.get("status").flatMap(_.headOption)
+        .flatMap(s => BookStatus.fromString(s.toLowerCase()))
+
+    //getting date of finishing reading if the user finished
+    val finishedAtOpt: Option[LocalDate] =
+      form.get("finishedAt")
+        .flatMap(_.headOption)
+        .filter(_.nonEmpty)
+        .map(LocalDate.parse)
 
     statusOpt match {
       case Some(status) =>
-        bookEntryRepository.updateStatus(id, status)
-        Redirect(routes.HomeController.editBookEntry(id))
+        bookEntryRepository.updateStatusAndFinishedAt(entryId, status, finishedAtOpt)
+          .map(_ => Redirect(routes.HomeController.editBookEntry(entryId)))
 
       case None =>
-        BadRequest("Nieprawidłowy status")
+        Future.successful(BadRequest("Nieprawidłowy status"))
     }
   }
 
-  private def ensureCover(book: Book): Book = {
+
+private def ensureCover(book: Book): Book = {
     val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
     book.copy(cover = coverValue)
   }

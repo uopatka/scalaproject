@@ -7,6 +7,8 @@ import persistence.tables.Entries
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Future, ExecutionContext}
 import javax.inject._
+import java.time.LocalDate
+
 
 @Singleton
 class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
@@ -32,5 +34,23 @@ class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext)
 
   def updateStatus(id: Long, status: BookStatus): Future[Int] =
     db.run(table.filter(_.id === id).map(_.status).update(status))
+
+  def updateStatusAndFinishedAt(id: Long, status: BookStatus, finishedAt: Option[LocalDate]): Future[Int] = {
+    val finishedValueSql = finishedAt match {
+      case Some(date) if status == BookStatus.Finished => s"'${date.toString}'"
+      case _ => "NULL"
+    }
+
+    val sql =
+      sqlu"""
+      UPDATE entries
+      SET status = ${status.value},
+          finished_at = #$finishedValueSql
+      WHERE id = $id
+    """
+
+    db.run(sql)
+  }
+
 }
 

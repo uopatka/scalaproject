@@ -21,7 +21,8 @@ CREATE TABLE entries (
   created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status VARCHAR,
   pages_read INTEGER DEFAULT 0,
-  alt_cover TEXT NOT NULL DEFAULT ''
+  alt_cover TEXT NOT NULL DEFAULT '',
+  finished_at DATE
 );
 
 

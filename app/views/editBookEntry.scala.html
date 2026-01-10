@@ -205,6 +205,18 @@
             </option>
           </select>
 
+            @if(entry.status == models.BookStatus.Finished) {
+            <div class="mb-2">
+                <label class="form-label">Data przeczytania</label>
+                <input
+                        type="date"
+                        name="finishedAt"
+                        value="@{ entry.finishedAt.fold("")(_.toString) }"
+                class="form-control"
+                />
+            </div>
+            }
+
           <button class="btn btn-success btn-sm">Zapisz</button>
         </form>
       </details>

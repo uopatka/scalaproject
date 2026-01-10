@@ -13,6 +13,7 @@ import play.api.Configuration
 import persistence.BookRepository
 import persistence.BookEntryRepository
 import scala.concurrent.Future
+import java.time.LocalDate
 
 @Singleton
 class EntryController @Inject()( 
@@ -22,8 +23,9 @@ class EntryController @Inject()(
                                 config: Configuration)
                                 (implicit ec: ExecutionContext)
                                 extends BaseController with I18nSupport{
+
     def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
-    request.body.file("cover") match {
+      request.body.file("cover") match {
       case Some(file) =>
         val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
         val directory = Paths.get(config.get[String]("app.uploads.dir"))
@@ -113,21 +115,27 @@ class EntryController @Inject()(
     }
   }
 
-  def updateStatus(id: Long) = Action { implicit request =>
+  def updateStatus(entryId: Long) = Action.async { implicit request =>
+    val form = request.body.asFormUrlEncoded.getOrElse(Map.empty)
+
     val statusOpt: Option[BookStatus] =
-      for {
-        form <- request.body.asFormUrlEncoded
-        value <- form.get("status").flatMap(_.headOption)
-        status <- BookStatus.fromString(value.toLowerCase)
-      } yield status
+      form.get("status").flatMap(_.headOption)
+        .flatMap(s => BookStatus.fromString(s.toLowerCase()))
+
+    //getting date of finishing reading if the user finished
+    val finishedAtOpt: Option[LocalDate] =
+      form.get("finishedAt")
+        .flatMap(_.headOption)
+        .filter(_.nonEmpty)
+        .map(LocalDate.parse)
 
     statusOpt match {
       case Some(status) =>
-        bookEntryRepository.updateStatus(id, status)
-        Redirect(routes.HomeController.editBookEntry(id))
+        bookEntryRepository.updateStatusAndFinishedAt(entryId, status, finishedAtOpt)
+          .map(_ => Redirect(routes.HomeController.editBookEntry(entryId)))
 
       case None =>
-        BadRequest("Nieprawidłowy status")
+        Future.successful(BadRequest("Nieprawidłowy status"))
     }
   }
 }

@@ -1,7 +1,7 @@
 <p align="right"><b>Projekt końcowy na <em>Programowanie w języku Scala</em></b></p>
 
 <p align="center">
-    <a href="https://bugshelv.aiwo.pl">
+    <a href="https://bugshelv.aiwo.pl" target="_blank">
         <img src="bugshelvHeader.png" alt="Bugshelv" width="400">
     </a>
 </p>

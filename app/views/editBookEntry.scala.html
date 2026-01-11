@@ -66,7 +66,7 @@
              class="img-fluid mb-3">
 
         <!-- Upload new cover -->
-        <form action="@routes.HomeController.editBookCover(entry.id)"
+        <form action="@routes.EntryController.editBookCover(entry.id)"
               method="POST" enctype="multipart/form-data"
               class="mt-2">
 
@@ -98,7 +98,7 @@
                     Rok publikacji: Do uzupełnienia ✏️
                 </summary>
 
-                <form action="@routes.HomeController.updateBookYear(entry.id)"
+                <form action="@routes.EntryController.updateBookYear(entry.id)"
                       method="POST"
                       class="mt-2">
 
@@ -126,7 +126,7 @@
                     Liczba stron: Do uzupełnienia ✏️
                 </summary>
 
-                <form action="@routes.HomeController.updateBookPages(entry.id)"
+                <form action="@routes.EntryController.updateBookPages(entry.id)"
                       method="POST"
                       class="mt-2">
 
@@ -153,7 +153,7 @@
           Przeczytane strony: @entry.pagesRead ✏️
         </summary>
 
-        <form action="@routes.HomeController.updatePagesRead(entry.id)"
+        <form action="@routes.EntryController.updatePagesRead(entry.id)"
               method="POST"
               class="mt-2">
 
@@ -177,7 +177,7 @@
           Status: @entry.status ✏️
         </summary>
 
-        <form action="@routes.HomeController.updateStatus(entry.id)"
+        <form action="@routes.EntryController.updateStatus(entry.id)"
               method="POST"
               class="mt-2">
 

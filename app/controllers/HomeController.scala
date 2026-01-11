@@ -57,9 +57,8 @@ class HomeController @Inject()(
 
     val statusFilter: Option[BookStatus] =
       filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
-    
-    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
-    val authorQuery: Option[String] = filters.get("author").map(_.trim).filter(_.nonEmpty)
+
+    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
 
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
@@ -89,27 +88,22 @@ class HomeController @Inject()(
       val filteredBooks =
         booksSeq.filter(b => userRefIds.contains(b.isbn)).map(ensureCover).toList
       
-      val titleFilteredBooks = titleQuery match {
+      val searchFilteredEntries = searchQuery match {
         case Some(query) =>
           val lowerCaseQuery = query.toLowerCase
-          filteredBooks.filter { book =>
-            book.title.toLowerCase.contains(lowerCaseQuery)
-          }
-        case None => filteredBooks
+          filteredEntries.filter { entry =>
+            val matchingBook = filteredBooks.find(_.isbn == entry.refId)
+            matchingBook.exists { book =>
+              book.title.toLowerCase.contains(lowerCaseQuery) ||
+              book.author.toLowerCase.contains(lowerCaseQuery)
+              }
+            }
+        case None => filteredEntries
       } 
 
-      val finalFilteredBooks = authorQuery match {
-        case Some(query) =>
-          val lowerCaseQuery = query.toLowerCase
-          titleFilteredBooks.filter { book =>
-            book.author.toLowerCase.contains(lowerCaseQuery)
-          }
-        case None => titleFilteredBooks
-      } 
-
-      val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
-      val finalFilteredEntries =
-        filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
+      val finalFilteredBooks = filteredBooks.filter { book =>
+        searchFilteredEntries.exists(_.refId == book.isbn)
+      }
 
       val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
         case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -120,7 +114,7 @@ class HomeController @Inject()(
         case ("year", "desc")  => finalFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
         case _                 => finalFilteredBooks
       }
-      val sortedEntries = finalFilteredEntries.sortBy(entry => 
+      val sortedEntries = searchFilteredEntries.sortBy(entry => 
         sortedBooks.indexWhere(_.isbn == entry.refId)
       )
 
@@ -147,8 +141,7 @@ class HomeController @Inject()(
 
     val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
 
-    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
-    val authorQuery: Option[String] = filters.get("author").map(_.trim).filter(_.nonEmpty)
+    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
 
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
@@ -174,27 +167,22 @@ class HomeController @Inject()(
 
         val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.refId).toSet.contains(b.isbn)).map(ensureCover).toList
 
-        val titleFilteredBooks = titleQuery match {
+        val searchFilteredEntries = searchQuery match {
           case Some(query) =>
             val lowerCaseQuery = query.toLowerCase
-            filteredBooks.filter { book =>
-              book.title.toLowerCase.contains(lowerCaseQuery)
-            }
-          case None => filteredBooks
+            filteredEntries.filter { entry =>
+              val matchingBook = filteredBooks.find(_.isbn == entry.refId)
+              matchingBook.exists { book =>
+                book.title.toLowerCase.contains(lowerCaseQuery) ||
+                book.author.toLowerCase.contains(lowerCaseQuery)
+                }
+              }
+          case None => filteredEntries
         } 
 
-        val finalFilteredBooks = authorQuery match {
-          case Some(query) =>
-            val lowerCaseQuery = query.toLowerCase
-            titleFilteredBooks.filter { book =>
-              book.author.toLowerCase.contains(lowerCaseQuery)
-            }
-          case None => titleFilteredBooks
-        } 
-
-        val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
-        val finalFilteredEntries =
-          filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
+        val finalFilteredBooks = filteredBooks.filter { book =>
+          searchFilteredEntries.exists(_.refId == book.isbn)
+        }
 
         val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
           case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -206,12 +194,12 @@ class HomeController @Inject()(
           case _                 => finalFilteredBooks
         }
 
-        val sortedEntries = finalFilteredEntries.sortBy(entry => 
+        val sortedEntries = searchFilteredEntries.sortBy(entry => 
           sortedBooks.indexWhere(_.isbn == entry.refId)
         )
 
         val selectedBook: Option[(Entry, Book)] = for {
-          entry <- finalFilteredEntries.find(_.refId == isbn)
+          entry <- searchFilteredEntries.find(_.refId == isbn)
           book  <- sortedBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
@@ -451,122 +439,6 @@ class HomeController @Inject()(
       }
     )
   }
-
-  def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
-    request.body.file("cover") match {
-      case Some(file) =>
-        val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
-        val directory = Paths.get(config.get[String]("app.uploads.dir"))
-
-        Files.createDirectories(directory)
-
-        val path = directory.resolve(filename)
-
-        file.ref.moveTo(path, replace = true)
-
-        bookEntryRepository.getById(entryId).flatMap {
-          case Some(entry) =>
-            val updated = entry.copy(
-              altCover = filename
-            )
-            bookEntryRepository.update(updated).map { _ =>
-              Redirect(routes.HomeController.editBookEntry(entryId))
-            }
-          case None =>
-            Files.deleteIfExists(path)
-            Future.successful(NotFound("Nie znaleziono wpisu"))
-        }
-      case None =>
-        Future.successful(BadRequest("Nie przesłano pliku"))
-    }
-
-  }
-
-
-  def updatePagesRead(id: Long) = Action { implicit request =>
-    request.body.asFormUrlEncoded
-      .flatMap(_.get("pagesRead").flatMap(_.headOption))
-      .flatMap(s => scala.util.Try(s.toInt).toOption) match {
-
-      case Some(pages) =>
-        bookEntryRepository.updatePagesRead(id, pages)
-        Redirect(routes.HomeController.editBookEntry(id))
-
-      case None =>
-        BadRequest("Nieprawidłowa liczba stron")
-    }
-  }
-
-  def updateBookPages(entryId: Long) = Action.async { implicit request =>
-    val pagesOpt = request.body.asFormUrlEncoded
-      .flatMap(_.get("pages").flatMap(_.headOption))
-      .flatMap(s => scala.util.Try(s.toInt).toOption)
-
-    pagesOpt match {
-      case Some(pages) if pages >= 0 =>
-        for {
-          entryOpt <- bookEntryRepository.getById(entryId)
-          _ <- entryOpt match {
-            case Some(entry) =>
-              bookRepository.getByIsbn(entry.refId).flatMap {
-                case Some(book) =>
-                  bookRepository.update(book.copy(pages = pages))
-                case None => Future.successful(0)
-              }
-            case None => Future.successful(0)
-          }
-        } yield Redirect(routes.HomeController.editBookEntry(entryId))
-      case _ => Future.successful(BadRequest("Nieprawidłowa liczba stron"))
-    }
-  }
-
-  def updateBookYear(entryId: Long) = Action.async { implicit request =>
-    val yearOpt = request.body.asFormUrlEncoded
-      .flatMap(_.get("publishYear").flatMap(_.headOption))
-      .flatMap(s => scala.util.Try(s.toInt).toOption)
-
-    yearOpt match {
-      case Some(year) if year >= 0 && year <= java.time.Year.now.getValue =>
-        for {
-          entryOpt <- bookEntryRepository.getById(entryId)
-          _ <- entryOpt match {
-            case Some(entry) =>
-              bookRepository.getByIsbn(entry.refId).flatMap {
-                case Some(book) =>
-                  bookRepository.update(book.copy(publishYear = year))
-                case None => Future.successful(0)
-              }
-            case None => Future.successful(0)
-          }
-        } yield Redirect(routes.HomeController.editBookEntry(entryId))
-      case _ => Future.successful(BadRequest("Nieprawidłowy rok"))
-    }
-  }
-
-  def updateStatus(entryId: Long) = Action.async { implicit request =>
-    val form = request.body.asFormUrlEncoded.getOrElse(Map.empty)
-
-    val statusOpt: Option[BookStatus] =
-      form.get("status").flatMap(_.headOption)
-        .flatMap(s => BookStatus.fromString(s.toLowerCase()))
-
-    //getting date of finishing reading if the user finished
-    val finishedAtOpt: Option[LocalDate] =
-      form.get("finishedAt")
-        .flatMap(_.headOption)
-        .filter(_.nonEmpty)
-        .map(LocalDate.parse)
-
-    statusOpt match {
-      case Some(status) =>
-        bookEntryRepository.updateStatusAndFinishedAt(entryId, status, finishedAtOpt)
-          .map(_ => Redirect(routes.HomeController.editBookEntry(entryId)))
-
-      case None =>
-        Future.successful(BadRequest("Nieprawidłowy status"))
-    }
-  }
-
 
 private def ensureCover(book: Book): Book = {
     val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover

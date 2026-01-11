@@ -29,10 +29,10 @@ GET     /edit-book-entry/:id            controllers.HomeController.editBookEntry
 POST    /edit-book-entry                controllers.HomeController.editBookEntrySubmit()
 
 # Edit pages read
-POST    /book-entry/:id/pages-read      controllers.HomeController.updatePagesRead(id: Long)
+POST    /book-entry/:id/pages-read      controllers.EntryController.updatePagesRead(id: Long)
 
 # Edit status
-POST    /book-entry/:id/status          controllers.HomeController.updateStatus(id: Long)
+POST    /book-entry/:id/status          controllers.EntryController.updateStatus(id: Long)
 
 # Log in form
 GET     /login                          controllers.AuthController.loginPage()
@@ -46,7 +46,7 @@ GET     /register                       controllers.AuthController.registerPage(
 POST    /register                       controllers.AuthController.registerSubmit()
 
 # Edit cover
-POST    /books/:entryId/editCover       controllers.HomeController.editBookCover(entryId: Long)
+POST    /books/:entryId/editCover       controllers.EntryController.editBookCover(entryId: Long)
 
 # Serve files
 GET     /uploads/:filename              controllers.HomeController.serveUpload(filename: String)
@@ -65,10 +65,10 @@ POST    /note/delete/:noteId            controllers.NoteController.delete(noteId
 GET     /book-entry/:id                 controllers.HomeController.showBookByEntryId(id: Long)
 
 # Update book's pages
-POST  /book/updatePages/:entryId       controllers.HomeController.updateBookPages(entryId: Long)
+POST    /book/updatePages/:entryId      controllers.EntryController.updateBookPages(entryId: Long)
 
 # Update book's publish year
-POST  /book/updateYear/:entryId        controllers.HomeController.updateBookYear(entryId: Long)
+POST    /book/updateYear/:entryId       controllers.EntryController.updateBookYear(entryId: Long)
 
-#For showung notes
-GET    /notes                          controllers.NoteController.showNotes
+# For showing notes
+GET    /notes                           controllers.NoteController.showNotes

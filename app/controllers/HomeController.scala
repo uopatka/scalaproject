@@ -267,7 +267,7 @@ class HomeController @Inject()(
                 for {
                   existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
-                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case Some(_) => Future.successful(0)
                     case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
@@ -324,7 +324,6 @@ class HomeController @Inject()(
 
       bookData => {
         val finalBookData = bookData.copy(isbn = isbn)
-
 
         val ensureGuestF: Future[Unit] = if (userId == 0L) {
           userRepository.getById(0L).flatMap {

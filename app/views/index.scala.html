@@ -12,12 +12,69 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
 @main("Strona główna") {
 <style>
+    body {
+        background-color: #F8FAFC; 
+    }
+
     .green-background-panel {
         background-color: #4A9782;
         padding: 20px;
         border-radius: 4px;
         min-height: 450px;
         color: white;
+    }
+
+    .login-btn {
+        padding: 0.5rem 1.5rem;
+        color: #4A9782;
+        border: 2px solid #4A9782;
+        font-weight: 600;
+        border-radius: 50rem;
+        background-color: transparent;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .login-btn:hover {
+        background-color: #4A9782;
+        color: white;
+    }
+
+    .logout-btn {
+        padding: 0.5rem 1.5rem;
+        color: #B3170C;
+        border: 2px solid #B3170C;
+        font-weight: 600;
+        border-radius: 50rem;
+        background-color: transparent;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 1rem;
+    }
+
+    .logout-btn:hover {
+        background-color: #B3170C;
+        color: white;
+    }
+
+    .add-book-btn {
+        padding: 0.5rem 1.5rem;
+        color: white;
+        border: 2px solid black;
+        font-weight: 600;
+        border-radius: 50rem;
+        background-color: black;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 1rem;
+    }
+
+    .add-book-btn:hover {
+        background-color: transparent;
+        color: black;
     }
 
     .book-button {
@@ -53,7 +110,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div class="user-info d-flex flex-column align-items-end">
             <div>
             Witaj, <strong>@name</strong>!
-            <a href="@routes.AuthController.logout()" class="btn btn-outline-danger btn-sm ms-2">Wyloguj się</a>
+            <a href="@routes.AuthController.logout()" class="logout-btn">Wyloguj się</a>
             </div>
 
             <div class="mt-1">
@@ -64,7 +121,10 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             </div>
         </div>
         }.getOrElse {
-        <a href="@routes.AuthController.loginPage()" class="btn btn-outline-primary btn-sm">Zaloguj się</a>
+        <a href="@routes.AuthController.loginPage()" 
+           class="login-btn">
+            Zaloguj się
+        </a>
         }
     </div>
 
@@ -78,7 +138,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             Bugshelv
         </h1>
         <div class="mt-3">
-            <a href="@routes.HomeController.addBook()" class="btn btn-light btn-lg shadow-sm">
+            <a href="@routes.HomeController.addBook()" class="add-book-btn">
                 <i class="bi bi-plus-lg"></i> Dodaj książkę
             </a>
         </div>
@@ -198,19 +258,28 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div class="col-md-5 d-flex flex-column">
             <div class="green-background-panel h-100 ">
                 @selectedBook.map { case (entry, book) =>
-                <div class="mb-3">
-                    <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm">Usuń</a>
-                    <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-sm shadow-sm">Edytuj</a>
-                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <img src="@CoverResolver.resolve(entry, book)" 
+                             class="img-fluid rounded shadow w-100 h-100" 
+                             style="max-height: 300px; object-fit: contain;">
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3 text-end">
+                            <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm me-2">
+                                <img src="@routes.Assets.versioned("images/trash-icon.svg")" alt="Usuń" style="height: 20px; width: auto;">
+                            </a>
+                            <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-sm shadow-sm">
+                                <img src="@routes.Assets.versioned("images/edit-icon.svg")" alt="Edytuj" style="height: 20px; width: auto;">
+                            </a>
+                        </div>
 
-                <div class="text-center mb-3">
-                    <img src="@CoverResolver.resolve(entry, book)" class="img-fluid rounded shadow" style="max-height: 300px;">
+                        <h3>@book.title</h3>
+                        <p><strong>Autor:</strong> @book.author</p>
+                        <p><strong>Status:</strong> @entry.status</p>
+                        <p><strong>Strony:</strong> @entry.pagesRead / @if(book.pages == 0) {?} else {@book.pages}</p>
+                    </div>
                 </div>
-
-                <h3>@book.title</h3>
-                <p><strong>Autor:</strong> @book.author</p>
-                <p><strong>Status:</strong> @entry.status</p>
-                <p><strong>Strony:</strong> @entry.pagesRead / @if(book.pages == 0) {?} else {@book.pages}</p>
 
                 <hr>
                 <h4>Notatki</h4>

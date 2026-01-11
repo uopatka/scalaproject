@@ -1,7 +1,7 @@
 <p align="right"><b>Projekt końcowy na <em>Programowanie w języku Scala</em></b></p>
 
 <p align="center">
-    <a href="https://bugshelv.aiwo.pl" target="_blank">
+    <a href="https://bugshelv.aiwo.pl">
         <img src="bugshelvHeader.png" alt="Bugshelv" width="400">
     </a>
 </p>
@@ -59,4 +59,5 @@ psql "$DB_URL" -U "$DB_USER" -f create_tables.sql
 
 ## Ikonki (do wybrania)
 https://www.svgrepo.com/collection/iconship-interface-icons
+
 https://www.svgrepo.com/collection/software-mansion-curved-line-icons

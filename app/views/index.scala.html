@@ -109,9 +109,15 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
         <div>
             @username.map { name =>
-            <a href="@routes.NoteController.showNotes" class="add-book-btn btn-sm">
-                <i class="bi bi-plus-lg"></i> Moje notatki
-            </a>
+            <div class="d-flex flex-column align-items-start gap-2">
+                <a href="@routes.NoteController.showNotes" class="add-book-btn btn-sm">
+                    <i class="bi bi-plus-lg"></i> Moje notatki
+                </a>
+
+                <a href="@routes.HomeController.drawToReadBook" class="add-book-btn btn-sm mt-1">
+                    <i class="bi bi-plus-lg"></i> Losuj
+                </a>
+            </div>
             }
         </div>
 

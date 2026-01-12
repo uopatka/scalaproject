@@ -72,3 +72,5 @@ POST    /book/updateYear/:entryId       controllers.EntryController.updateBookYe
 
 # For showing notes
 GET    /notes                           controllers.NoteController.showNotes
+
+GET   /draw-to-read-book      controllers.HomeController.drawToReadBook

@@ -52,5 +52,11 @@ class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext)
     db.run(sql)
   }
 
+  def findByUserAndStatus(userId: Long, status: BookStatus): Future[Seq[Entry]] = {
+    db.run(table.filter(e => e.userId === userId && e.status === status).result)
+  }
+
+
+
 }
 

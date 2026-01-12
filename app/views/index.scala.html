@@ -1,6 +1,6 @@
 @(entries: List[models.Entry],
-sortedBooks: List[models.Book],
-selectedBook: Option[(models.Entry, models.Book)] = None,
+sortedItems: List[models.DisplayItem],
+selectedBook: Option[(models.Entry, models.DisplayItem)] = None,
 notes: Seq[models.Note] = Seq.empty,
 username: Option[String] = None,
 filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.RequestHeader)
@@ -233,15 +233,22 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                 <p>Brak książek.</p>
                 } else {
                 @for(entry <- entries) {
-                @defining(sortedBooks.find(_.isbn == entry.refId)) { bookOpt =>
+                @defining(sortedItems.find(_.id == entry.refId)) { itemOpt =>
                 @defining(
                 routes.HomeController.showBook(entry.refId).url +
                 (if (filters.nonEmpty) "?" + filters.map { case (k,v) => k + "=" + v }.mkString("&") else "")
                 ) { bookUrl =>
                 <a href="@bookUrl" class="book-button @if(selectedBook.exists(_._1.refId == entry.refId)) { active }">
-                    @bookOpt.map { book =>
-                    <strong>@book.title</strong><br>
-                    <span class="book-author">@book.author</span>
+                    @itemOpt.map { item =>
+                    <strong>@item.title</strong><br>
+                    <span class="book-author">
+                        @{
+                            item match {
+                                case b: models.Book => b.author
+                                case p: models.Publication => p.authors
+                            }
+                        }
+                    </span>
                     }.getOrElse {
                     <em>Nieznana książka (ISBN: @entry.refId)</em>
                     }
@@ -257,10 +264,10 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         @* prawa kolumna *@
         <div class="col-md-5 d-flex flex-column">
             <div class="green-background-panel h-100 ">
-                @selectedBook.map { case (entry, book) =>
+                @selectedBook.map { case (entry, item) =>
                 <div class="row mb-3">
                     <div class="col-6">
-                        <img src="@CoverResolver.resolve(entry, book)" 
+                        <img src="@CoverResolver.resolve(entry, item)" 
                              class="img-fluid rounded shadow w-100 h-100" 
                              style="max-height: 300px; object-fit: contain;">
                     </div>
@@ -273,11 +280,20 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                                 <img src="@routes.Assets.versioned("images/edit-icon.svg")" alt="Edytuj" style="height: 20px; width: auto;">
                             </a>
                         </div>
-
-                        <h3>@book.title</h3>
-                        <p><strong>Autor:</strong> @book.author</p>
+                        <h3>@item.title</h3>
+                        <p><strong>Autor: </strong>@{
+                            item match {
+                                case b: models.Book => b.author
+                                case p: models.Publication => p.authors
+                            }
+                        }</p>
                         <p><strong>Status:</strong> @entry.status</p>
-                        <p><strong>Strony:</strong> @entry.pagesRead / @if(book.pages == 0) {?} else {@book.pages}</p>
+                        <p><strong>Strony:</strong> @entry.pagesRead / @{
+                            item match {
+                                case b: models.Book => if (b.pages == 0) "?" else b.pages.toString
+                                case p: models.Publication => p.pageCount.toString
+                            }
+                        }</p>
                     </div>
                 </div>
 

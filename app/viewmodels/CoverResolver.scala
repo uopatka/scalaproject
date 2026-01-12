@@ -1,14 +1,15 @@
 package viewmodels
 
 import models.{Book, Entry}
+import models.DisplayItem
 
 object CoverResolver {
   private val uploadsBaseUrl = "/uploads"
 
-  def resolve(entry: Entry, book: Book): String = {
+  def resolve(entry: Entry, item: DisplayItem): String = {
     if (entry.altCover.nonEmpty) s"$uploadsBaseUrl/${entry.altCover}"
-    else if (book.cover.startsWith("http://") || book.cover.startsWith("https://")) book.cover
-    else if (book.cover.nonEmpty) s"$uploadsBaseUrl/${book.cover}"
+    else if (item.cover.startsWith("http://") || item.cover.startsWith("https://")) item.cover
+    else if (item.cover.nonEmpty) s"$uploadsBaseUrl/${item.cover}"
     else "/assets/images/placeholder_cover.png"
   }
 }

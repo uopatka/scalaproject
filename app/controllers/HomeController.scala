@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, Entry, User, BookStatus, Note, Publication}
+import models.{Book, Entry, User, BookStatus, Note, Publication, DisplayItem}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -65,14 +65,17 @@ class HomeController @Inject()(
 
     for {
       entries <- entriesF
-      booksSeq <- bookRepository.getAll()
+      books <- bookRepository.getAll()
+      publications <- publicationRepository.getAll()
     } yield {
-      val (sortedEntries, sortedBooks) =
-        utils.BookUtils.filterAndSortBooks(entries, booksSeq, filters)
+      val allItems: Seq[DisplayItem] = books.map(b => b: DisplayItem) ++ publications.map(p => p: DisplayItem)
+      
+      val (sortedEntries, sortedItems) =
+        utils.BookUtils.filterAndSortItems(entries, allItems, filters)
 
       val notes: Seq[Note] = Seq.empty
 
-      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername, filters))
+      Ok(views.html.index(sortedEntries, sortedItems, selectedBook = None, notes, maybeUsername, filters))
     }
   }
 
@@ -83,40 +86,44 @@ class HomeController @Inject()(
     }
   }
 
-  def showBook(isbn: String) = Action.async { implicit request =>
-    val maybeUsername: Option[String] = request.session.get("username")
-    val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
+def showBook(posId: String) = Action.async { implicit request =>
+  val maybeUsername: Option[String] = request.session.get("username")
+  val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
-    val filters: Map[String, String] = 
-      request.queryString.view.mapValues(_.head).toMap
+  val filters: Map[String, String] =
+    request.queryString.view.mapValues(_.head).toMap
 
-    val entriesF: Future[List[Entry]] = maybeUserId match {
-      case Some(userId) =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
-      case None =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
-    }
+  val entriesF: Future[List[Entry]] = maybeUserId match {
+    case Some(userId) => bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
+    case None         => bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
+  }
 
-    entriesF.flatMap { entries =>
-      bookRepository.getAll().flatMap { booksSeq =>
-        val (sortedEntries, sortedBooks) = utils.BookUtils.filterAndSortBooks(entries, booksSeq, filters)
+  entriesF.flatMap { entries =>
+    bookRepository.getAll().flatMap { booksSeq =>
+      publicationRepository.getAll().flatMap { publicationsSeq =>
+        val allItems: Seq[DisplayItem] =
+          booksSeq.map(b => b: DisplayItem) ++ publicationsSeq.map(p => p: DisplayItem)
 
-        val selectedBook: Option[(Entry, Book)] = for {
-          entry <- sortedEntries.find(_.refId == isbn)
-          book  <- sortedBooks.find(_.isbn == isbn)
-        } yield (entry, book)
+        val (sortedEntries, sortedItems) =
+          utils.BookUtils.filterAndSortItems(entries, allItems, filters)
 
-        val notesF: Future[Seq[Note]] = selectedBook match {
+        val selectedItem: Option[(Entry, DisplayItem)] = for {
+          entry <- sortedEntries.find(_.refId == posId)
+          item  <- sortedItems.find(_.id == posId)
+        } yield (entry, item)
+
+        val notesF: Future[Seq[Note]] = selectedItem match {
           case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
           case None             => Future.successful(Seq.empty)
         }
 
         notesF.map { notes =>
-          Ok(views.html.index(sortedEntries, sortedBooks, selectedBook, notes, maybeUsername, filters))
+          Ok(views.html.index(sortedEntries, sortedItems, selectedItem, notes, maybeUsername, filters))
         }
       }
     }
   }
+}
 
   val bookForm: Form[String] = Form(
     single(

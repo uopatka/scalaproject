@@ -226,7 +226,7 @@ def showBook(posId: String) = Action.async { implicit request =>
     publicationForm.bindFromRequest().fold(
       formWithErrors =>
         Future.successful(
-          BadRequest(views.html.addBook(formWithErrors))
+          BadRequest(views.html.addPublication(formWithErrors))
         ),
 
       doi => {
@@ -237,7 +237,7 @@ def showBook(posId: String) = Action.async { implicit request =>
             val boundForm = publicationForm.bindFromRequest()
             Future.successful(
               BadRequest(
-                views.html.addBook(
+                views.html.addPublication(
                   boundForm.withGlobalError("Ta publikacja jest już w Twojej bibliotece")
                 )
               )
@@ -268,10 +268,10 @@ def showBook(posId: String) = Action.async { implicit request =>
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
-                val boundForm = bookForm.bindFromRequest()
+                val boundForm = publicationForm.bindFromRequest()
                 Future.successful(
                   BadRequest(
-                    views.html.addBook(
+                    views.html.addPublication(
                       boundForm.withGlobalError("Nie znaleziono publikacji dla tego DOI")
                     )
                   )

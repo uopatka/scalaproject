@@ -34,14 +34,14 @@
                 @for(error <- publicationForm.globalErrors) {
                     <div class="alert alert-danger">@error.message</div>
 
-                    @publicationForm.data.get("doi").map { doi =>
+                    <!-- @publicationForm.data.get("doi").map { doi =>
                         @if(error.message == "Nie znaleziono publikacji dla tego DOI") {
                             <a href="@routes.HomeController.createPublication(doi)"
                                class="btn btn-warning btn-sm mt-2">
                                 Dodaj publikację ręcznie
                             </a>
                         }
-                    }
+                    } -->
                 }
 
                 @* === Field errors === *@

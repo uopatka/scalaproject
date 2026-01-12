@@ -120,11 +120,11 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div>
             @username.map { name =>
             <div class="d-flex align-items-center gap-2">
-                <a href="@routes.NoteController.showNotes" class="login-btn btn-sm">
+                <a href="@routes.NoteController.showNotes()" class="login-btn btn-sm">
                     <i class="bi bi-plus-lg"></i> Moje notatki
                 </a>
 
-                <a href="@routes.HomeController.drawToReadBook" class="login-btn btn-sm">
+                <a href="@routes.HomeController.drawToReadBook()" class="login-btn btn-sm">
                     <i class="bi bi-plus-lg"></i> Losuj
                 </a>
             </div>

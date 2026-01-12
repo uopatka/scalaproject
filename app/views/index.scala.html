@@ -105,22 +105,29 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
 <div class="container mt-4">
     @* Sekcja użytkownika *@
-    <div class="d-flex justify-content-end mb-3">
-        @username.map { name =>
-        <div class="user-info d-flex flex-column align-items-end">
-            <div>
-            Witaj, <strong>@name</strong>!
-            <a href="@routes.AuthController.logout()" class="logout-btn">Wyloguj się</a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
+        <div>
+            @username.map { name =>
+            <a href="@routes.NoteController.showNotes" class="add-book-btn btn-sm">
+                <i class="bi bi-plus-lg"></i> Moje notatki
+            </a>
+            }
         </div>
-        }.getOrElse {
-        <a href="@routes.AuthController.loginPage()" 
-           class="login-btn">
-            Zaloguj się
-        </a>
-        }
+
+        <div>
+            @username.map { name =>
+            <div class="d-flex flex-column align-items-end gap-2">
+                <span>Witaj, <strong>@name</strong>!</span>
+                <a href="@routes.AuthController.logout()" class="logout-btn btn-sm">Wyloguj się</a>
+            </div>
+            }.getOrElse {
+            <a href="@routes.AuthController.loginPage()" class="login-btn btn-sm">Zaloguj się</a>
+            }
+        </div>
+
     </div>
+
 
     @* Nagłówek strony *@
     <div class="text-center mb-5">
@@ -131,13 +138,9 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             class="me-3">
             Bugshelv
         </h1>
-        <div class="div class="mt-4 d-flex justify-content-center gap-3">
+        <div class="mt-4">
             <a href="@routes.HomeController.addBook()" class="add-book-btn">
                 <i class="bi bi-plus-lg"></i> Dodaj książkę
-            </a>
-
-            <a href ="@routes.NoteController.showNotes" class = "add-book-btn">
-                <i class = "bi bi-plus-lg"></i> Moje notatki
             </a>
         </div>
 

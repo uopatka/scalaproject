@@ -175,7 +175,6 @@ def showBook(posId: String) = Action.async { implicit request =>
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
-                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -184,16 +183,16 @@ def showBook(posId: String) = Action.async { implicit request =>
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
+                  existsOpt <- bookRepository.getByIsbn(fetchedBook.id)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0)
-                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
+                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
                   }
                   _ <- ensureGuestF
                   _ <- bookEntryRepository.insert(Entry(id = 0L,
                     userId = userId,
                     entryType = models.EntryType.Book,
-                    refId = bookWithCover.isbn,
+                    refId = fetchedBook.id,
                     altCover = ""))
                 } yield Redirect(routes.HomeController.index())
 
@@ -359,13 +358,17 @@ def showBook(posId: String) = Action.async { implicit request =>
     val maybeUsername: Option[String] = request.session.get("username")
     for {
       entryOpt <- bookEntryRepository.getById(id)
-      bookOpt <- entryOpt match {
-        case Some(entry) => bookRepository.getByIsbn(entry.refId)
+      itemOpt <- entryOpt match {
+        case Some(entry) => 
+          bookRepository.getByIsbn(entry.refId).flatMap {
+            case Some(book) => Future.successful(Some(book: DisplayItem))
+            case None       => publicationRepository.getByDoi(entry.refId).map(_.map(p => p: DisplayItem))
+          }
         case None => Future.successful(None)
       }
     } yield {
-      (entryOpt, bookOpt) match {
-        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, ensureCover(book), maybeUsername))
+      (entryOpt, itemOpt) match {
+        case (Some(entry), Some(item)) => Ok(views.html.editBookEntry(entry, ensureCover(item), maybeUsername))
         case _ => NotFound("Książka nie znaleziona")
       }
     }
@@ -398,7 +401,6 @@ def showBook(posId: String) = Action.async { implicit request =>
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
-                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -407,13 +409,13 @@ def showBook(posId: String) = Action.async { implicit request =>
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
+                  existsOpt <- bookRepository.getByIsbn(fetchedBook.id)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
+                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(Entry(0L, userId, models.EntryType.Book, bookWithCover.isbn))
+                  _ <- bookEntryRepository.insert(Entry(0L, userId, models.EntryType.Book, fetchedBook.id))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -431,9 +433,12 @@ def showBook(posId: String) = Action.async { implicit request =>
     )
   }
 
-  private def ensureCover(book: Book): Book = {
-    val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
-    book.copy(cover = coverValue)
+  private def ensureCover(item: DisplayItem): DisplayItem = {
+    val coverValue = if (item.cover.isEmpty) "/assets/images/placeholder_cover.png" else item.cover
+    item match {
+      case book: Book => book.copy(cover = coverValue)
+      case publication: Publication => publication.copy(cover = coverValue)
+    }
   }
 
   def serveUpload(filename: String) = Action {

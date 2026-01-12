@@ -1,10 +1,10 @@
 @(entry: models.Entry,
-  book: models.Book,
+  item: models.DisplayItem,
   username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
 @import viewmodels.CoverResolver
 
-@main(book.title) {
+@main(item.title) {
 
 <style>
   .green-background-panel {
@@ -60,8 +60,8 @@
 
     <!-- Cover -->
     <div class="col-md-5 text-center book-cover">
-      @if(entry.altCover.nonEmpty || book.cover.nonEmpty) {
-        <img src="@CoverResolver.resolve(entry, book)"
+      @if(entry.altCover.nonEmpty || item.cover.nonEmpty) {
+        <img src="@CoverResolver.resolve(entry, item)"
              alt="Okładka książki"
              class="img-fluid mb-3">
 
@@ -86,13 +86,13 @@
 
     <!-- Info -->
     <div class="col-md-7 book-info">
-      <h1>@book.title</h1>
+      <h1>@item.title</h1>
 
-      <p><strong>Autor:</strong> @book.author</p>
-      <p><strong>ISBN:</strong> @book.isbn</p>
+      <p><strong>Autor:</strong> @item.authors</p>
+      <p><strong>ID:</strong> @item.id</p>
 
         <!-- Year of publishing -->
-        @if(book.publishYear == 0) {
+        @if(item.year == 0) {
             <details class="mb-3">
                 <summary>
                     Rok publikacji: Do uzupełnienia ✏️
@@ -105,10 +105,10 @@
                     @helper.CSRF.formField
 
                     <input type="number"
-                           name="publishYear"
+                           name="year"
                            min="0"
                            max="@java.time.Year.now.getValue"
-                           value="@book.publishYear"
+                           value="@item.year"
                            class="form-control mb-2"
                            required>
 
@@ -116,11 +116,11 @@
                 </form>
             </details>
         } else {
-        <p><strong>Rok publikacji:</strong> @book.publishYear</p>
+        <p><strong>Rok publikacji:</strong> @item.year</p>
         }
 
         <!-- Pages in the book -->
-        @if(book.pages == 0) {
+        @if(item.pageCount == 0) {
             <details class="mb-3">
                 <summary>
                     Liczba stron: Do uzupełnienia ✏️
@@ -133,10 +133,10 @@
                     @helper.CSRF.formField
 
                     <input type="number"
-                           name="pages"
+                           name="pageCount"
                            min="0"
                            max="5000"
-                           value="@book.pages"
+                           value="@item.pageCount"
                            class="form-control mb-2"
                            required>
 
@@ -144,7 +144,7 @@
                 </form>
             </details>
         } else {
-        <p><strong>Liczba stron:</strong> @book.pages</p>
+        <p><strong>Liczba stron:</strong> @item.pageCount</p>
         }
 
       <!-- Pages read -->
@@ -162,7 +162,7 @@
           <input type="number"
                  name="pagesRead"
                  min="0"
-                 max="@book.pages"
+                 max="@item.pageCount"
                  value="@entry.pagesRead"
                  class="form-control mb-2"
                  required>

@@ -119,7 +119,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
         <div>
             @username.map { name =>
-            <a href="@routes.NoteController.showNotes" class="add-book-btn btn-sm">
+            <a href="@routes.NoteController.showNotes" class="login-btn btn-sm">
                 <i class="bi bi-plus-lg"></i> Moje notatki
             </a>
             }
@@ -127,7 +127,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
         <div>
             @username.map { name =>
-            <div class="d-flex flex-column align-items-end gap-2">
+            <div class="d-flex align-items-center gap-2">
                 <span>Witaj, <strong>@name</strong>!</span>
                 <a href="@routes.AuthController.logout()" class="logout-btn btn-sm">Wyloguj się</a>
             </div>

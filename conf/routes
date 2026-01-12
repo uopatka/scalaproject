@@ -16,9 +16,16 @@ GET     /book/:isbn                     controllers.HomeController.showBook(isbn
 GET     /add-book                       controllers.HomeController.addBook()
 POST    /add-book                       controllers.HomeController.addBookSubmit()
 
+# Add publication form
+GET     /add-publication                controllers.HomeController.addPublication()
+POST    /add-publication                controllers.HomeController.addPublicationSubmit()
+
 # Create book form
 GET     /create-book/:isbn              controllers.HomeController.createBook(isbn: String)
 POST    /create-book/:isbn              controllers.HomeController.createBookSubmit(isbn: String)
+
+# Create publication form
+GET     /create-publication/:doi        controllers.HomeController.createPublication(doi: String)
 
 # Delete book
 GET     /delete-book                    controllers.HomeController.deleteBook(id: Long)

@@ -7,6 +7,15 @@ CREATE TABLE books (
   cover VARCHAR
 );
 
+CREATE TABLE publications (
+  doi VARCHAR PRIMARY KEY,
+  title VARCHAR NOT NULL,
+  authors VARCHAR,
+  publish_year INTEGER,
+  pages VARCHAR,
+  cover VARCHAR
+);
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username VARCHAR NOT NULL,

@@ -9,7 +9,7 @@ class Publications(tag: Tag) extends Table[Publication](tag, "publications") {
   def title = column[String]("title")
   def authors = column[String]("authors")
   def publishYear = column[Int]("publish_year")
-  def pages = column[Int]("pages")
+  def pages = column[String]("pages")
   def cover = column[String]("cover")
 
   def pk = primaryKey("publications_pkey", doi)

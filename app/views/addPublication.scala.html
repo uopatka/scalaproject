@@ -1,0 +1,73 @@
+@(publicationForm: play.api.data.Form[String])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+
+@import controllers.routes
+@import helper._
+
+@main("Dodaj publikację") {
+<div class="position-absolute top-0 start-0 m-4">
+    <a href="@routes.HomeController.index()" class="text-decoration-none text-dark d-flex align-items-center">
+        <img src="@routes.Assets.versioned("images/left-svgrepo-com.png")"
+        alt="Arrow Icon"
+        style="height: 40px; width: auto;"
+        class="me-1">
+        <img src="@routes.Assets.versioned("images/bookworm.png")" 
+             alt="Bugshelv Icon" 
+             style="height: 40px; width: auto;" 
+             class="me-2">
+        <span class="h3 mb-0 fw-bold">Bugshelv</span>
+    </a>
+</div>
+
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-3">Dodaj nową publikację</h1>
+        <p class="text-muted">Wprowadź dane poniżej, aby powiększyć swoją kolekcję.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            @helper.form(action = routes.HomeController.addPublicationSubmit()) {
+                @CSRF.formField
+
+                @* === Global errors === *@
+                @for(error <- publicationForm.globalErrors) {
+                    <div class="alert alert-danger">@error.message</div>
+
+                    @publicationForm.data.get("doi").map { doi =>
+                        @if(error.message == "Nie znaleziono publikacji dla tego DOI") {
+                            <a href="@routes.HomeController.createPublication(doi)"
+                               class="btn btn-warning btn-sm mt-2">
+                                Dodaj publikację ręcznie
+                            </a>
+                        }
+                    }
+                }
+
+                @* === Field errors === *@
+                @for(error <- publicationForm("doi").errors) {
+                    <div class="alert alert-danger">@error.message</div>
+                }
+
+                <div class="mb-3">
+                    @helper.inputText(
+                        publicationForm("doi"),
+                        Symbol("_label") -> "DOI",
+                        Symbol("class") -> "form-control",
+                        Symbol("placeholder") -> "Wpisz numer DOI",
+                        Symbol("_showConstraints") -> false
+                    )
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <button type="submit" class="btn btn-primary btn-light">
+                            Dodaj publikację
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+}

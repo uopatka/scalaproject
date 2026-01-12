@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, Entry, User, BookStatus, Note}
+import models.{Book, Entry, User, BookStatus, Note, Publication}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -17,6 +17,7 @@ import repositories.{BookRepository => TestBookRepository}
 import repositories.{EntryRepository => TestEntryRepository}
 import forms.CreateBookForm
 import persistence.BookRepository
+import persistence.PublicationRepository
 import persistence.BookEntryRepository
 import persistence.NoteRepository
 import persistence.SlickColumnMappers._
@@ -32,9 +33,11 @@ import models.Entry
 class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
                                 bookRepository: BookRepository,
+                                publicationRepository: PublicationRepository,
                                 bookEntryRepository: BookEntryRepository,
                                 userRepository: persistence.UserRepository,
                                 openLibraryService: services.OpenLibraryService,
+                                crossrefService: services.CrossrefService,
                                 noteRepository: NoteRepository,
                                 config: Configuration
                               )(implicit ec: ExecutionContext)
@@ -235,6 +238,15 @@ class HomeController @Inject()(
     )
   )
 
+  val publicationForm: Form[String] = Form(
+    single(
+      "doi" -> nonEmptyText.verifying(
+        "Nieprawidłowy DOI",
+        doi => doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""") || doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""")
+      )
+    )
+  )
+
   def addBook() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.addBook(bookForm))
   }
@@ -295,6 +307,76 @@ class HomeController @Inject()(
                   BadRequest(
                     views.html.addBook(
                       boundForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                    )
+                  )
+                )
+            }
+          }
+        }
+      }
+    )
+  }
+
+  def addPublication() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.addPublication(publicationForm))
+  }
+
+  def addPublicationSubmit() = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+
+    publicationForm.bindFromRequest().fold(
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.addBook(formWithErrors))
+        ),
+
+      doi => {
+        bookEntryRepository.getAll().map(_.exists(entry =>
+          entry.userId == userId && entry.refId == doi
+        )).flatMap { alreadyExists =>
+          if (alreadyExists) {
+            val boundForm = publicationForm.bindFromRequest()
+            Future.successful(
+              BadRequest(
+                views.html.addBook(
+                  boundForm.withGlobalError("Ta publikacja jest już w Twojej bibliotece")
+                )
+              )
+            )
+          } else {
+            crossrefService.fetchByDoi(doi).flatMap {
+              case Some(fetchedPublication) =>
+                // ensureCover?
+                val ensureGuestF: Future[Unit] = if (userId == 0L) {
+                  userRepository.getById(0L).flatMap {
+                    case Some(_) => Future.successful(())
+                    case None    => userRepository.insert(User(0L, "guest", "")).map(_ => ())
+                  }
+                } else Future.successful(())
+
+                for {
+                  existsOpt <- publicationRepository.getByDoi(fetchedPublication.doi)
+                  _ <- existsOpt match {
+                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case None    => publicationRepository.insert(fetchedPublication).map(_ => 1)
+                  }
+                  _ <- ensureGuestF
+                  _ <- bookEntryRepository.insert(Entry(id = 0L,
+                    userId = userId,
+                    entryType = models.EntryType.Publication,
+                    refId = fetchedPublication.doi,
+                    altCover = ""))
+                } yield Redirect(routes.HomeController.index())
+
+              case None =>
+                val boundForm = bookForm.bindFromRequest()
+                Future.successful(
+                  BadRequest(
+                    views.html.addBook(
+                      boundForm.withGlobalError("Nie znaleziono publikacji dla tego DOI")
                     )
                   )
                 )
@@ -368,6 +450,9 @@ class HomeController @Inject()(
     )
   }
 
+  def createPublication(doi: String) = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.addPublication(publicationForm))
+  }
 
   def deleteBook(id: Long) = Action.async { implicit request =>
     bookEntryRepository.delete(id).map { _ =>

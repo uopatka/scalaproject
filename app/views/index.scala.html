@@ -19,7 +19,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     .green-background-panel {
         background-color: #4A9782;
         padding: 20px;
-        border-radius: 4px;
+        border-radius: 1.5rem;
         min-height: 450px;
         color: white;
     }
@@ -319,7 +319,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                                 case p: models.Publication => p.authors
                             }
                         }</p>
-                        <p><strong>Status:</strong> @entry.status</p>
+                        <p><strong>Status:</strong> @models.BookStatus.label(entry.status)</p>
                         <p><strong>Strony:</strong> @entry.pagesRead / @{
                             item match {
                                 case b: models.Book => if (b.pages == 0) "?" else b.pages.toString

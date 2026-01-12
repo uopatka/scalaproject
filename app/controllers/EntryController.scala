@@ -24,8 +24,8 @@ class EntryController @Inject()(
                                 (implicit ec: ExecutionContext)
                                 extends BaseController with I18nSupport{
 
-    def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
-      request.body.file("cover") match {
+  def editBookCover(entryId: Long) = Action(parse.multipartFormData).async { implicit request =>
+    request.body.file("cover") match {
       case Some(file) =>
         val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
         val directory = Paths.get(config.get[String]("app.uploads.dir"))
@@ -51,9 +51,7 @@ class EntryController @Inject()(
       case None =>
         Future.successful(BadRequest("Nie przesłano pliku"))
     }
-
   }
-
 
   def updatePagesRead(id: Long) = Action { implicit request =>
     request.body.asFormUrlEncoded
@@ -92,6 +90,34 @@ class EntryController @Inject()(
     }
   }
 
+  def updateTags(entryId: Long) = Action.async { implicit request =>
+    val tagsOpt = request.body.asFormUrlEncoded
+      .flatMap(_.get("tags").flatMap(_.headOption))
+
+    tagsOpt match {
+      case Some(newTag) =>
+        bookEntryRepository.getById(entryId).flatMap {
+          case Some(entry) =>
+            val existingTags = entry.tags.split(", ").map(_.trim).filter(_.nonEmpty)
+            val updatedTags = 
+              if (existingTags.contains(newTag)) 
+                entry.tags
+              else if (entry.tags.isEmpty)
+                newTag
+              else
+                s"${entry.tags}, $newTag"
+            
+            bookEntryRepository
+              .update(entry.copy(tags = updatedTags))
+              .map(_ => Redirect(routes.HomeController.editBookEntry(entryId)))
+
+          case None =>
+            Future.successful(NotFound("Nie znaleziono wpisu"))
+        }
+      case None => Future.successful(BadRequest("Nieprawidłowe tagi"))
+    }
+  }
+
   def updateBookYear(entryId: Long) = Action.async { implicit request =>
     val yearOpt = request.body.asFormUrlEncoded
       .flatMap(_.get("publishYear").flatMap(_.headOption))
@@ -122,7 +148,7 @@ class EntryController @Inject()(
       form.get("status").flatMap(_.headOption)
         .flatMap(s => BookStatus.fromString(s.toLowerCase()))
 
-    //getting date of finishing reading if the user finished
+    // getting date of finishing reading if the user finished
     val finishedAtOpt: Option[LocalDate] =
       form.get("finishedAt")
         .flatMap(_.headOption)

@@ -72,14 +72,13 @@ POST    /note/delete/:noteId            controllers.NoteController.delete(noteId
 GET     /book-entry/:id                 controllers.HomeController.showBookByEntryId(id: Long)
 
 # Update book's pages
-POST  /book/updatePages/:entryId        controllers.HomeController.updateBookPages(entryId: Long)
+POST    /book/updatePages/:entryId      controllers.EntryController.updateBookPages(entryId: Long)
 
 # Update book's publish year
-POST    /book/updateYear/:entryId        controllers.EntryController.updateBookYear(entryId: Long)
+POST    /book/updateYear/:entryId       controllers.EntryController.updateBookYear(entryId: Long)
 
 # Update entry's tags
-POST  /book-entry/:entryId/tags         controllers.HomeController.updateTags(entryId: Long)
-
+POST    /book-entry/:entryId/tags       controllers.EntryController.updateTags(entryId: Long)
 
 # For showing notes
-GET    /notes                           controllers.NoteController.showNotes
+GET     /notes                          controllers.NoteController.showNotes

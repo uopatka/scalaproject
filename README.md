@@ -57,7 +57,5 @@ export DB_PASSWORD="your_password"
 psql "$DB_URL" -U "$DB_USER" -f create_tables.sql 
 ```
 
-## Ikonki (do wybrania)
+## Ikonki
 https://www.svgrepo.com/collection/iconship-interface-icons
-
-https://www.svgrepo.com/collection/software-mansion-curved-line-icons

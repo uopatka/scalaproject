@@ -7,7 +7,8 @@ object CoverResolver {
 
   def resolve(entry: Entry, book: Book): String = {
     if (entry.altCover.nonEmpty) s"$uploadsBaseUrl/${entry.altCover}"
-    else if (book.cover.nonEmpty) book.cover
+    else if (book.cover.startsWith("http://") || book.cover.startsWith("https://")) book.cover
+    else if (book.cover.nonEmpty) s"$uploadsBaseUrl/${book.cover}"
     else "/assets/images/placeholder_cover.png"
   }
 }

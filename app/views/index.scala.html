@@ -88,6 +88,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     }
 
     .book-button {
+        background-color: rgba(255, 255, 255, 0.05);
         display: block;
         width: 100%;
         padding: 14px 16px;
@@ -147,7 +148,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
     @* Nagłówek strony *@
     <div class="text-center mb-5">
-        <h1 class="display-3 d-flex align-items-center justify-content-center">
+        <h1 style="font-weight: 900;" class="display-3 d-flex align-items-center justify-content-center">
             <img src="@routes.Assets.versioned("images/bookworm.png")"
             alt="Bugshelv Icon"
             style="height: 1em; width: auto;"

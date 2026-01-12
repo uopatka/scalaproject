@@ -1,4 +1,4 @@
-@(bookData: Option[(models.Entry, Option[models.Book])])(implicit request: play.api.mvc.RequestHeader)
+@(bookData: Option[(models.Entry, Option[models.DisplayItem])])(implicit request: play.api.mvc.RequestHeader)
 
 @main("Losowanie książki") {
 
@@ -19,13 +19,13 @@
 <div class="container py-5 text-center">
     <h1 class="mb-4"> Losowanie książki do przeczytania</h1>
 
-    @bookData.map { case (entry, maybeBook) =>
-    @maybeBook.map { book =>
+    @bookData.map { case (entry, maybeItem) =>
+    @maybeItem.map { item =>
     <div class="card shadow-sm p-4 mb-3 mx-auto" style="max-width: 400px;">
-        <h2>@book.title</h2>
-        <p><strong>Autor:</strong> @book.author</p>
-        <p><strong>Status:</strong> @entry.status</p>
-        <p><strong>Przeczytane strony:</strong> @entry.pagesRead / @book.pages</p>
+        <h2>@item.title</h2>
+        <p><strong>Autor:</strong> @item.authors</p>
+        <p><strong>Status:</strong> @models.BookStatus.label(entry.status)</p>
+        <p><strong>Przeczytane strony:</strong> @entry.pagesRead / @item.pageCount</p>
     </div>
     }.getOrElse {
     <p>Nie udało się znaleźć szczegółów tej książki.</p>

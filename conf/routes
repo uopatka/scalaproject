@@ -81,7 +81,7 @@ POST    /book/updateYear/:entryId       controllers.EntryController.updateBookYe
 POST    /book-entry/:entryId/tags       controllers.EntryController.updateTags(entryId: Long)
 
 # For showing notes
-GET     /notes                          controllers.NoteController.showNotes
+GET     /notes                          controllers.NoteController.showNotes()
 
 # Drawing a book
-GET     /draw-to-read-book              controllers.HomeController.drawToReadBook
+GET     /draw-to-read-book              controllers.HomeController.drawToReadBook()

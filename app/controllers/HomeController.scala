@@ -461,8 +461,17 @@ def showBook(posId: String) = Action.async { implicit request =>
           } else {
             // losujemy jedną książkę
             val randomEntry = entries(scala.util.Random.nextInt(entries.length))
-            bookRepository.getByIsbn(randomEntry.refId).map { maybeBook =>
-              Ok(views.html.drawBook(Some((randomEntry, maybeBook))))
+
+            randomEntry.entryType match {
+            case models.EntryType.Book =>
+              bookRepository.getByIsbn(randomEntry.refId).map { maybeBook =>
+                Ok(views.html.drawBook(Some((randomEntry, maybeBook))))
+              }
+
+            case models.EntryType.Publication =>
+              publicationRepository.getByDoi(randomEntry.refId).map { maybePub =>
+                Ok(views.html.drawBook(Some((randomEntry, maybePub))))
+              }
             }
           }
         }

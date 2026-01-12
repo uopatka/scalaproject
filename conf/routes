@@ -82,3 +82,6 @@ POST    /book-entry/:entryId/tags       controllers.EntryController.updateTags(e
 
 # For showing notes
 GET     /notes                          controllers.NoteController.showNotes
+
+# Drawing a book
+GET     /draw-to-read-book              controllers.HomeController.drawToReadBook

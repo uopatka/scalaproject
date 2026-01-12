@@ -448,4 +448,30 @@ def showBook(posId: String) = Action.async { implicit request =>
     if (file.exists()) Ok.sendFile(file)
     else NotFound("Nie znaleziono wpisu")
   }
+
+  def drawToReadBook = Action.async { implicit request =>
+    request.session.get("userId") match {
+      case Some(id) =>
+        val uid = id.toLong
+        // Pobierz wszystkie książki użytkownika ze statusem "Do przeczytania"
+        bookEntryRepository.findByUserAndStatus(uid, BookStatus.ToRead).flatMap { entries =>
+          if (entries.isEmpty) {
+            // brak książek → None
+            Future.successful(Ok(views.html.drawBook(None)))
+          } else {
+            // losujemy jedną książkę
+            val randomEntry = entries(scala.util.Random.nextInt(entries.length))
+            bookRepository.getByIsbn(randomEntry.refId).map { maybeBook =>
+              Ok(views.html.drawBook(Some((randomEntry, maybeBook))))
+            }
+          }
+        }
+
+      case None =>
+        Future.successful(Redirect(routes.AuthController.loginPage()))
+    }
+  }
+
+
+
 }

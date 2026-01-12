@@ -1,0 +1,40 @@
+@(bookData: Option[(models.Entry, Option[models.Book])])(implicit request: play.api.mvc.RequestHeader)
+
+@main("Losowanie książki") {
+
+<div class="position-absolute top-0 start-0 m-4">
+    <a href="@routes.HomeController.index()" class="text-decoration-none text-dark d-flex align-items-center">
+        <img src="@routes.Assets.versioned("images/left-svgrepo-com.png")"
+        alt="Arrow Icon"
+        style="height: 40px; width: auto;"
+        class="me-1">
+        <img src="@routes.Assets.versioned("images/bookworm.png")"
+        alt="Bugshelv Icon"
+        style="height: 40px; width: auto;"
+        class="me-2">
+        <span class="h3 mb-0 fw-bold">Bugshelv</span>
+    </a>
+</div>
+
+<div class="container py-5 text-center">
+    <h1 class="mb-4"> Losowanie książki do przeczytania</h1>
+
+    @bookData.map { case (entry, maybeBook) =>
+    @maybeBook.map { book =>
+    <div class="card shadow-sm p-4 mb-3 mx-auto" style="max-width: 400px;">
+        <h2>@book.title</h2>
+        <p><strong>Autor:</strong> @book.author</p>
+        <p><strong>Status:</strong> @entry.status</p>
+        <p><strong>Przeczytane strony:</strong> @entry.pagesRead / @book.pages</p>
+    </div>
+    }.getOrElse {
+    <p>Nie udało się znaleźć szczegółów tej książki.</p>
+    }
+    }.getOrElse {
+    <p>Nie masz żadnych książek oznaczonych jako „Do przeczytania”.</p>
+    }
+
+    <a href="@routes.HomeController.drawToReadBook" class="btn btn-success mt-3">Losuj inną książkę</a>
+</div>
+
+}

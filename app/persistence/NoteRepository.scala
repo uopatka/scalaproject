@@ -13,6 +13,9 @@ class NoteRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
 
   private val table = Notes.table
 
+  def findAll(): Future[Seq[Note]] =
+    db.run(table.sortBy(_.updatedAt.desc).result)
+
   def create(note: Note): Future[Long] =
     db.run((table returning table.map(_.id)) += note)
 

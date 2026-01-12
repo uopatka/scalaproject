@@ -113,12 +113,6 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             <a href="@routes.AuthController.logout()" class="logout-btn">Wyloguj się</a>
             </div>
 
-            <div class="mt-1">
-                <a href ="@routes.NoteController.showNotes"
-                   class = "btn btn-link btn-sm p-0">
-                    Moje notatki
-                </a>
-            </div>
         </div>
         }.getOrElse {
         <a href="@routes.AuthController.loginPage()" 
@@ -137,11 +131,16 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             class="me-3">
             Bugshelv
         </h1>
-        <div class="mt-3">
+        <div class="div class="mt-4 d-flex justify-content-center gap-3">
             <a href="@routes.HomeController.addBook()" class="add-book-btn">
                 <i class="bi bi-plus-lg"></i> Dodaj książkę
             </a>
+
+            <a href ="@routes.NoteController.showNotes" class = "add-book-btn">
+                <i class = "bi bi-plus-lg"></i> Moje notatki
+            </a>
         </div>
+
     </div>
 
     @* Główna zawartość *@

@@ -1,6 +1,5 @@
-@(notes: Seq[models.Note])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+@(notes: Seq[(models.Note, models.Entry, models.Book)])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
 
-@import helper._
 @import controllers.routes
 @import java.time.format.DateTimeFormatter
 
@@ -8,6 +7,7 @@
 
 @main("Moje notatki") {
 
+<!-- Return to page -->
 <div class="position-absolute top-0 start-0 m-4">
     <a href="@routes.HomeController.index()"
        class="text-decoration-none text-dark d-flex align-items-center">
@@ -29,29 +29,60 @@
     @if(notes.isEmpty) {
     <p>Nie masz jeszcze żadnych notatek.</p>
     } else {
-    <div class="list-group">
-        @for(note <- notes) {
-        <div class="note-card mb-3 p-3 border rounded bg-light text-dark">
-            <strong>@note.title</strong>
-            <p>@note.content</p>
-            <small>
+
+    @for((note, entry, book) <- notes) {
+
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+
+            <!-- Note title-->
+            <h5 class="card-title mb-1">
+                @note.title
+            </h5>
+
+            <!-- Book title -->
+            <h6 class="card-subtitle mb-2 text-muted">
+                📘
+                <a href="@routes.HomeController.editBookEntry(entry.id)"
+                   class="text-decoration-none">
+                    @book.title
+                </a>
+            </h6>
+
+            <!-- Note content -->
+            <p class="card-text">
+                @note.content
+            </p>
+
+            <!-- Dates -->
+            <small class="text-muted">
                 Utworzono: @note.createdAt.format(dateFormatter)
                 @if(note.updatedAt.isAfter(note.createdAt)) {
                 | Ostatnia edycja: @note.updatedAt.format(dateFormatter)
                 }
             </small>
-            <div class="mt-2">
-                <a href="@routes.NoteController.edit(note.id)" class="btn btn-sm btn-outline-primary me-1">Edytuj</a>
-                <form action="@routes.NoteController.delete(note.id)" method="POST" style="display:inline;">
-                    @CSRF.formField
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+
+            <div class="mt-3">
+                <a href="@routes.NoteController.edit(note.id)"
+                   class="btn btn-sm btn-outline-primary me-2">
+                    Edytuj notatkę
+                </a>
+
+                <form action="@routes.NoteController.delete(note.id)"
+                      method="POST"
+                      style="display:inline;">
+                    @helper.CSRF.formField
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger">
+                        Usuń
+                    </button>
                 </form>
             </div>
+
         </div>
-        }
     </div>
     }
-
+    }
 </div>
 
 }

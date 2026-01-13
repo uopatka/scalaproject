@@ -1,23 +1,23 @@
 package repositories
 
-import models.{BookEntry, BookStatus}
+import models.{Entry, BookStatus, EntryType}
 import org.scalatestplus.play.PlaySpec
 
-class BookEntryRepositorySpec extends PlaySpec {
+class EntryRepositorySpec extends PlaySpec {
 
-  "BookEntryRepository" should {
+  "EntryRepository" should {
 
     "start with default entries" in {
-      val repo = new BookEntryRepository()
+      val repo = new EntryRepository()
       repo.findAll().length must be > 0
     }
 
     "add a new entry correctly" in {
-      val repo = new BookEntryRepository()
+      val repo = new EntryRepository()
       val initialCount = repo.findAll().length
       val newId = repo.nextId()
       
-      val newEntry = BookEntry(newId, 1, "1234567890")
+      val newEntry = Entry(newId, 1, EntryType.Book, "1234567890")
       repo.add(newEntry)
 
       repo.findAll().length mustBe (initialCount + 1)

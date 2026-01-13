@@ -21,17 +21,29 @@ import org.mockito.ArgumentMatchers
 class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar {
 
   override def fakeApplication() = {
-    val bookRepo = new repositories.BookRepository()
-    val entryRepo = new repositories.BookEntryRepository()
-
+    val mockBookRepo = mock[persistence.BookRepository]
+    val mockPublicationRepo = mock[persistence.PublicationRepository]
+    val mockEntryRepo = mock[persistence.BookEntryRepository]
+    val mockUserRepo = mock[persistence.UserRepository]
+    val mockNoteRepo = mock[persistence.NoteRepository]
     val mockOpenLib = mock[services.OpenLibraryService]
+    val mockCrossref = mock[services.CrossrefService]
+
     when(mockOpenLib.fetchByIsbn(ArgumentMatchers.anyString())).thenReturn(Future.successful(None))
+    when(mockCrossref.fetchByDoi(ArgumentMatchers.anyString())).thenReturn(Future.successful(None))
+    when(mockBookRepo.getAll()).thenReturn(Future.successful(Seq.empty))
+    when(mockPublicationRepo.getAll()).thenReturn(Future.successful(Seq.empty))
+    when(mockEntryRepo.getAll()).thenReturn(Future.successful(Seq.empty))
 
     GuiceApplicationBuilder()
       .overrides(
-        bind[repositories.BookRepository].toInstance(bookRepo),
-        bind[repositories.BookEntryRepository].toInstance(entryRepo),
-        bind[services.OpenLibraryService].toInstance(mockOpenLib)
+        bind[persistence.BookRepository].toInstance(mockBookRepo),
+        bind[persistence.PublicationRepository].toInstance(mockPublicationRepo),
+        bind[persistence.BookEntryRepository].toInstance(mockEntryRepo),
+        bind[persistence.UserRepository].toInstance(mockUserRepo),
+        bind[persistence.NoteRepository].toInstance(mockNoteRepo),
+        bind[services.OpenLibraryService].toInstance(mockOpenLib),
+        bind[services.CrossrefService].toInstance(mockCrossref)
       ).build()
   }
 
@@ -43,7 +55,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include ("Bugshelv")
     }
 
     "render the index page from the application" in {
@@ -52,7 +64,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include ("Bugshelv")
     }
 
     "render the index page from the router" in {
@@ -61,7 +73,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include ("Bugshelv")
     }
   }
 }

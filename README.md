@@ -10,7 +10,7 @@
 
 - **Julia Masiarz** - Scala, frontend  
 - **Natalia Uścińska** - frontend, UI, Docker  
-- **Paweł Witkowski**  
+- **Paweł Witkowski**  - testowanie..
 - **Aleksandra Woźnica** - Scala, backend, frontend
 
 

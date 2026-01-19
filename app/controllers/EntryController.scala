@@ -69,7 +69,7 @@ class EntryController @Inject()(
 
   def updateBookPages(entryId: Long) = Action.async { implicit request =>
     val pagesOpt = request.body.asFormUrlEncoded
-      .flatMap(_.get("pages").flatMap(_.headOption))
+      .flatMap(_.get("pageCount").flatMap(_.headOption))
       .flatMap(s => scala.util.Try(s.toInt).toOption)
 
     pagesOpt match {
@@ -120,7 +120,7 @@ class EntryController @Inject()(
 
   def updateBookYear(entryId: Long) = Action.async { implicit request =>
     val yearOpt = request.body.asFormUrlEncoded
-      .flatMap(_.get("publishYear").flatMap(_.headOption))
+      .flatMap(_.get("year").flatMap(_.headOption))
       .flatMap(s => scala.util.Try(s.toInt).toOption)
 
     yearOpt match {

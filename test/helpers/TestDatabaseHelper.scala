@@ -113,7 +113,7 @@ object TestDatabaseHelper {
   def setupTestData(db: Database)(implicit ec: ExecutionContext): Future[Unit] = {
     for {
       _ <- insertTestUser(db, 0L, "guest", "")
-      _ <- insertTestUser(db, 1L, "testuser", "password123")
+      _ <- insertTestUser(db, 1L, "testuser", "$2a$10$N9qKqXbC7vhZ5vu8puJQvOQJ5YqhX.9MoxPw/xD9wR3BnJxSp.g8e") // BCrypt hash of "password123"
       _ <- insertTestBook(db, "9780141036144", "1984", "George Orwell", 1949, 328, "")
       _ <- insertTestBook(db, "9780060935467", "To Kill a Mockingbird", "Harper Lee", 1960, 281, "")
       _ <- insertTestEntry(db, 1L, "book", "9780141036144")

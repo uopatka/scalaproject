@@ -1,0 +1,186 @@
+﻿[info] welcome to sbt 1.11.7 (Eclipse Adoptium Java 21.0.9)
+[info] loading settings for project scalaproject-build from plugins.sbt...
+[info] loading project definition from C:\Users\pawel\OneDrive\Dokumenty\Github\scalaproject\project
+[info] loading settings for project root from build.sbt...
+[info]   __              __
+[info]   \ \     ____   / /____ _ __  __
+[info]    \ \   / __ \ / // __ `// / / /
+[info]    / /  / /_/ // // /_/ // /_/ /
+[info]   /_/  / .___//_/ \__,_/ \__, /
+[info]       /_/               /____/
+[info] 
+[info] Version 3.0.9 running Java 21.0.9
+[info] 
+[info] Play is run entirely by the community. Please consider contributing and/or donating:
+[info] https://www.playframework.com/sponsors
+[info] 
+[info] .env detected (fileName=.env). About to configure JVM System Environment with new map
+sbt : java.lang.reflect.InaccessibleObjectException: Unable to
+ make field private static final java.lang.ProcessEnvironment 
+java.lang.ProcessEnvironment.theEnvironment accessible: module
+ java.base does not "opens java.lang" to unnamed module @3ee6d
+c82
+At line:1 char:1
++ sbt "testOnly security.SqlInjectionSpec" 2>&1 | Out-File -Fi
+lePath te ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (java.lang.refle. 
+   ..odule @3ee6dc82:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+	at java.base/java.lang.reflect.AccessibleObject.throwInaccess
+ibleObjectException(AccessibleObject.java:391)
+	at java.base/java.lang.reflect.AccessibleObject.checkCanSetAc
+cessible(AccessibleObject.java:367)
+	at java.base/java.lang.reflect.AccessibleObject.checkCanSetAc
+cessible(AccessibleObject.java:315)
+	at java.base/java.lang.reflect.Field.checkCanSetAccessible(Fi
+eld.java:183)
+	at java.base/java.lang.reflect.Field.setAccessible(Field.java
+:177)
+	at au.com.onegeek.sbtdotenv.DirtyEnvironmentHack$.$anonfun$se
+tEnv$1(DirtyEnvironmentHack.scala:44)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV
+$sp.java:23)
+	at scala.util.Try$.apply(Try.scala:213)
+	at au.com.onegeek.sbtdotenv.DirtyEnvironmentHack$.setEnv(Dirt
+yEnvironmentHack.scala:38)
+	at au.com.onegeek.sbtdotenv.SbtDotenv$.applyEnvironment(SbtDo
+tenv.scala:106)
+	at au.com.onegeek.sbtdotenv.SbtDotenv$.$anonfun$configureEnvi
+ronment$2(SbtDotenv.scala:79)
+	at scala.Option.fold(Option.scala:251)
+	at au.com.onegeek.sbtdotenv.SbtDotenv$.configureEnvironment(S
+btDotenv.scala:79)
+	at au.com.onegeek.sbtdotenv.SbtDotenv$autoImport$.$anonfun$do
+tEnv$1(SbtDotenv.scala:44)
+	at scala.Function1.$anonfun$compose$1(Function1.scala:49)
+	at sbt.Project$.setProject(Project.scala:502)
+	at sbt.BuiltinCommands$.doLoadProject(Main.scala:979)
+	at sbt.BuiltinCommands$.$anonfun$loadProjectImpl$2(Main.scala
+:917)
+	at sbt.Command$.$anonfun$applyEffect$4(Command.scala:151)
+	at sbt.Command$.$anonfun$applyEffect$2(Command.scala:146)
+	at sbt.Command$.process(Command.scala:194)
+	at sbt.MainLoop$.$anonfun$processCommand$7(MainLoop.scala:267
+)
+	at scala.Option.getOrElse(Option.scala:189)
+	at sbt.MainLoop$.process$1(MainLoop.scala:267)
+	at sbt.MainLoop$.processCommand(MainLoop.scala:314)
+	at sbt.MainLoop$.$anonfun$next$5(MainLoop.scala:171)
+	at sbt.State$StateOpsImpl$.runCmd$1(State.scala:290)
+	at sbt.State$StateOpsImpl$.process$extension(State.scala:326)
+	at sbt.MainLoop$.$anonfun$next$4(MainLoop.scala:171)
+	at sbt.internal.util.ErrorHandling$.wideConvert(ErrorHandling
+.scala:24)
+	at sbt.MainLoop$.next(MainLoop.scala:171)
+	at sbt.MainLoop$.run(MainLoop.scala:152)
+	at sbt.MainLoop$.$anonfun$runWithNewLog$1(MainLoop.scala:127)
+	at sbt.io.Using.apply(Using.scala:41)
+	at sbt.MainLoop$.runWithNewLog(MainLoop.scala:120)
+	at sbt.MainLoop$.runAndClearLast(MainLoop.scala:74)
+	at sbt.MainLoop$.runLoggedLoop(MainLoop.scala:59)
+	at sbt.MainLoop$.runLogged(MainLoop.scala:50)
+	at sbt.StandardMain$.runManaged(Main.scala:225)
+	at sbt.xMain$.$anonfun$run$11(Main.scala:136)
+	at scala.util.DynamicVariable.withValue(DynamicVariable.scala
+:62)
+	at scala.Console$.withIn(Console.scala:230)
+	at sbt.internal.util.Terminal$.withIn(Terminal.scala:620)
+	at sbt.internal.util.Terminal$.$anonfun$withStreams$1(Termina
+l.scala:400)
+	at scala.util.DynamicVariable.withValue(DynamicVariable.scala
+:62)
+	at scala.Console$.withOut(Console.scala:167)
+	at sbt.internal.util.Terminal$.$anonfun$withOut$2(Terminal.sc
+ala:610)
+	at scala.util.DynamicVariable.withValue(DynamicVariable.scala
+:62)
+	at scala.Console$.withErr(Console.scala:196)
+	at sbt.internal.util.Terminal$.withOut(Terminal.scala:610)
+	at sbt.internal.util.Terminal$.withStreams(Terminal.scala:400
+)
+	at sbt.xMain$.withStreams$1(Main.scala:89)
+	at sbt.xMain$.run(Main.scala:124)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.
+invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at sbt.internal.XMainConfiguration.run(XMainConfiguration.jav
+a:59)
+	at sbt.xMain.run(Main.scala:48)
+	at xsbt.boot.Launch$.run$$anonfun$1(Launch.scala:132)
+	at xsbt.boot.Launch$.withContextLoader(Launch.scala:157)
+	at xsbt.boot.Launch$.run(Launch.scala:132)
+	at xsbt.boot.Launch$.apply$$anonfun$1(Launch.scala:43)
+	at xsbt.boot.Launch$.launch(Launch.scala:142)
+	at xsbt.boot.Launch$.apply(Launch.scala:43)
+	at xsbt.boot.Launch$.apply(Launch.scala:24)
+	at xsbt.boot.Boot$.runImpl(Boot.scala:73)
+	at xsbt.boot.Boot$.run(Boot.scala:69)
+	at xsbt.boot.Boot$.main(Boot.scala:23)
+	at xsbt.boot.Boot.main(Boot.scala)
+[info] Configured .env environment
+[info] SqlInjectionSpec:
+WARNING: A Java agent has been loaded dynamically (C:\Users\pa
+wel\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\mave
+n2\net\bytebuddy\byte-buddy-agent\1.14.11\byte-buddy-agent-1.1
+4.11.jar)
+WARNING: If a serviceability tool is in use, please run with -
+XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run wi
+th -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by defau
+lt in a future release
+OpenJDK 64-Bit Server VM warning: Sharing is only supported fo
+r boot loader classes because bootstrap classpath has been app
+ended
+2026-01-20 00:29:46 [34mINFO [0;39m [36mp.a.http.HttpErrorHandlerExceptions[0;39m [35m[0;39m Registering exception handler: guice-provision-exception-handler
+[info] AuthController SQL Injection Protection
+[info] - should reject SQL injection in login username field
+[info] - should reject SQL injection in login password field *** FAILED ***
+[info]   java.lang.IllegalArgumentException: Invalid salt version
+[info]   at org.mindrot.jbcrypt.BCrypt.hashpw(BCrypt.java:659)
+[info]   at org.mindrot.jbcrypt.BCrypt.checkpw(BCrypt.java:764)
+[info]   at security.PasswordHasher$.checkPassword(PasswordHasher.scala:11)
+[info]   at controllers.AuthController.$anonfun$loginSubmit$4(AuthController.scala:32)
+[info]   at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:500)
+[info]   at org.apache.pekko.dispatch.BatchingExecutor$AbstractBatch.processBatch(BatchingExecutor.scala:73)
+[info]   at org.apache.pekko.dispatch.BatchingExecutor$BlockableBatch.$anonfun$run$1(BatchingExecutor.scala:110)
+[info]   at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)
+[info]   at scala.concurrent.BlockContext$.withBlockContext(BlockContext.scala:94)
+[info]   at org.apache.pekko.dispatch.BatchingExecutor$BlockableBatch.run(BatchingExecutor.scala:110)
+[info]   ...
+[info] - should safely handle SQL injection in registration username
+[info] - should prevent SQL injection through multiple special characters
+[info] HomeController SQL Injection Protection
+[info] - should safely handle SQL injection in search query
+[info] - should safely handle SQL injection in status filter
+[info] - should prevent SQL injection in ISBN parameter
+[info] EntryController SQL Injection Protection
+[info] - should safely handle SQL injection in tags field
+[info] - should safely handle SQL injection in pages read field
+[info] - should prevent SQL injection in year field
+[info] - should safely handle SQL injection in status update
+[info] NoteController SQL Injection Protection
+[info] - should safely handle SQL injection in note title
+[info] - should safely handle SQL injection in note content
+[info] - should prevent SQL injection in note edit
+[info] Repository SQL Injection Protection
+[info] - should safely handle SQL injection in UserRepository.getByUsername
+[info] - should safely handle SQL injection in BookRepository.getByIsbn
+[info] - should safely handle date in BookEntryRepository.updateStatusAndFinishedAt
+[info] Form Validation SQL Injection Protection
+[info] - should reject malicious input in book ISBN form
+[info] - should reject malicious input in publication DOI form
+[info] Database Integrity After SQL Injection Attempts
+[info] - should maintain all tables after multiple injection attempts
+[info] - should preserve data integrity after injection attempts
+[info] Run completed in 8 seconds, 515 milliseconds.
+[info] Total number of tests run: 21
+[info] Suites: completed 1, aborted 0
+[info] Tests: succeeded 20, failed 1, canceled 0, ignored 0, pending 0
+[info] *** 1 TEST FAILED ***
+[error] Failed tests:
+[error] 	security.SqlInjectionSpec
+[error] (Test / testOnly) sbt.TestsFailedException: Tests unsuccessful
+[error] Total time: 15 s, completed 20 sty 2026, 00:29:51
